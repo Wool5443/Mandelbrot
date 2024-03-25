@@ -4,7 +4,7 @@
 #include "Utils.hpp"
 
 #define GET_COORD_TRANSPOSE_PARAMS()                                \
-const float dx     = 1.f / (float)camera->w * camera->scale;        \
+const float dx     = 1.f / 1000.f * camera->scale;                  \
 const float dy     = dx;                                            \
 const float xShift = (float)camera->w  / 2.f;                       \
 const float yShift = (float)camera->h / 2.f                         \
@@ -38,4 +38,4 @@ struct Camera
 *
 * @return error
 */
-ErrorCode DrawMandelbrot(SDL_Surface* surface, Camera* camera);
+ErrorCode DrawMandelbrotTrivial(SDL_Surface* surface, Camera* camera);

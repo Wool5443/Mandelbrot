@@ -22,7 +22,7 @@ static int _calculateColors()
     return 0;
 }
 
-ErrorCode DrawMandelbrot(SDL_Surface* surface, Camera* camera)
+ErrorCode DrawMandelbrotTrivial(SDL_Surface* surface, Camera* camera)
 {
     MyAssertSoft(surface, ERROR_NULLPTR);
 
