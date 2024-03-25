@@ -31,11 +31,19 @@ struct Camera
 };
 
 /*
-* @brief Draws one frame of Mandelbrot
+* @brief Draws one frame of Mandelbrot using trivial approach
 * @param [in] surface - sdl surface of main window
-* @param [in] scale  - inverse scale factor, aka scale = 2 is scaling outwards
-* @param [in] scale  - inverse scale factor, aka scale = 2 is scaling outwards
+* @param [in] camera  - camera info
 *
 * @return error
 */
 ErrorCode DrawMandelbrotTrivial(SDL_Surface* surface, Camera* camera);
+
+/*
+* @brief Draws one frame of Mandelbrot using trivial approach
+* @param [in] surface - sdl surface of main window
+* @param [in] camera  - camera info
+*
+* @return error
+*/
+ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera);

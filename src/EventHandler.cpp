@@ -2,6 +2,10 @@
 
 void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running)
 {
+    MyAssertHard(e,       ERROR_NULLPTR);
+    MyAssertHard(camera,  ERROR_NULLPTR);
+    MyAssertHard(running, ERROR_NULLPTR);
+
     switch (e->key.keysym.sym)
     {
         case SDLK_q:
@@ -42,6 +46,9 @@ void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running)
 
 void MouseButtonHandler(SDL_Event* e, Camera* camera)
 {
+    MyAssertHard(e,      ERROR_NULLPTR);
+    MyAssertHard(camera, ERROR_NULLPTR);
+
     int dx = 0, dy = 0;
     SDL_GetRelativeMouseState(&dx, &dy);
 
@@ -53,6 +60,9 @@ void MouseButtonHandler(SDL_Event* e, Camera* camera)
 
 void MouseWheelHandler(SDL_Event* e, Camera* camera)
 {
+    MyAssertHard(e,      ERROR_NULLPTR);
+    MyAssertHard(camera, ERROR_NULLPTR);
+
     float zoomValue = 1;
 
     if (e->wheel.y == 1) // zoom in
