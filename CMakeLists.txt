@@ -7,7 +7,7 @@ find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 
 set(CMAKE_CXX_FLAGS_DEBUG
-"Wno-switch -Wno-conversion -Wno-unused-variable -Wno-pointer-arith -ggdb3 -Wall                                            \
+"-Wno-switch -Wno-conversion -Wno-unused-variable -Wno-pointer-arith -ggdb3 -Wall                                           \
 -Wextra -Weffc++ -Waggressive-loop-optimizations -Wc++14-compat -Wmissing-declarations -Wcast-align -Wchar-subscripts       \
 -Wconditionally-supported -Wctor-dtor-privacy -Wempty-body -Wformat-nonliteral -Wformat-security -Wformat-signedness        \
 -Wformat=2 -Winline -Wlogical-op -Wnon-virtual-dtor -Wopenmp-simd -Woverloaded-virtual -Wpacked -Winit-self                 \
@@ -30,8 +30,9 @@ set (SOURCES
     "Utils/Utils.hpp"
     "src/main.cpp"
     "src/Mandelbrot.cpp"
-    "headers/MinMax.hpp"
-    "headers/WindowProperties.hpp"
+    "src/EventHandler.cpp"
+    "headers/EventHandler.hpp"
+    "headers/Mandelbrot.hpp"
 )
 
 include_directories(headers Utils)

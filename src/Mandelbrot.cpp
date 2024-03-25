@@ -5,8 +5,6 @@ static int _calculateColors();
 static const int   N_MAX  = 256;
 static const float R2_MAX = 10.f * 10.f;
 
-static const float X_CENTER_SHIFT = 0.5f;
-
 static uint32_t* COLORS = (uint32_t*)calloc(N_MAX + 1, sizeof(*COLORS));
 static int _dummy = _calculateColors();
 
@@ -30,21 +28,16 @@ ErrorCode DrawMandelbrot(SDL_Surface* surface, Camera* camera)
 
     SDL_LockSurface(surface);
 
-    const int width  = surface->clip_rect.w;
-    const int height = surface->clip_rect.h;
     uint32_t* pixels = (uint32_t*)surface->pixels;
 
-    const float dx     = 1.f / (float)width * camera->scale;
-    const float dy     = dx;
-    const float xShift = (float)width  / 2.f;
-    const float yShift = (float)height / 2.f;
+    GET_COORD_TRANSPOSE_PARAMS();
 
-    for (int iy = 0; iy < height; iy++)
+    for (int iy = 0; iy < camera->h; iy++)
     {
         float x0 = (          - xShift) * dx - camera->x - X_CENTER_SHIFT;
         float y0 = ((float)iy - yShift) * dy - camera->y;
 
-        for (int ix = 0; ix < width; ix++, x0 += dx)
+        for (int ix = 0; ix < camera->w; ix++, x0 += dx)
         {
             float x = x0, y = y0;
 
@@ -67,7 +60,7 @@ ErrorCode DrawMandelbrot(SDL_Surface* surface, Camera* camera)
                 N++;
             }
 
-            *(pixels + iy * width + ix) = COLORS[N];
+            *(pixels + iy * camera->w + ix) = COLORS[N];
         }
     }
 
