@@ -1,8 +1,6 @@
 #include <immintrin.h>
 #include "Mandelbrot.hpp"
 
-static int _calculateColors();
-
 static const char  ALPHA = 24;
 static const char  BLUE  = 16;
 static const char  GREEN =  8;
@@ -22,15 +20,16 @@ ErrorCode DrawMandelbrotTrivial(SDL_Surface* surface, Camera* camera)
 
     uint32_t* pixels = (uint32_t*)surface->pixels;
 
-    GET_COORD_TRANSPOSE_PARAMS();
+    float xShift = (float)camera->w / 2.f;
+    float yShift = (float)camera->h / 2.f;
 
     for (int iy = 0; iy < camera->h; iy++)
     {
-        float x0 = (          - xShift) * dx - camera->x - X_CENTER_SHIFT;
-        float y0 = ((float)iy - yShift) * dy - camera->y;
-
-        for (int ix = 0; ix < camera->w; ix++, x0 += dx)
+        for (int ix = 0; ix < camera->w; ix++)
         {
+            float x0 = ((float)ix - xShift) / camera->scale - camera->x;
+            float y0 = ((float)iy - yShift) / camera->scale - camera->y;
+
             float x = x0, y = y0;
 
             int N = 0;
@@ -56,8 +55,12 @@ ErrorCode DrawMandelbrotTrivial(SDL_Surface* surface, Camera* camera)
             if (N < N_MAX)
             {
                 char c = (char)(sqrtf(sqrtf((float)N / (float)N_MAX)) * (float)N_MAX);
-                char r = 255 - c;
-                char g = (c % 2) * 64;
+                // char r = 255 - c;
+                // char g = (c % 2) * 64;
+                // char b = c;
+
+                char r = c;
+                char g = c;
                 char b = c;
 
                 color = (0xff << ALPHA) + (r << RED) + (g << GREEN) + (b << BLUE);
@@ -82,27 +85,25 @@ ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera)
 
     uint32_t* pixels = (uint32_t*)surface->pixels;
 
-    GET_COORD_TRANSPOSE_PARAMS();
+    // const __m512 X_SHIFT  = _mm512_set1_ps(-xShift);
+    // const __m512 Y_SHIFT  = _mm512_set1_ps(-yShift);
+    // const __m512 DX       = _mm512_mul_ps(_mm512_set1_ps(dx), DX_FACTORS);
+    // const __m512 DY       = _mm512_set1_ps(dy);
+    // const __m512 CAMERA_X = _mm512_set1_ps(-camera->x - X_CENTER_SHIFT);
+    // const __m512 CAMERA_Y = _mm512_set1_ps(-camera->y);
 
-    const __m512 X_SHIFT  = _mm512_set1_ps(-xShift);
-    const __m512 Y_SHIFT  = _mm512_set1_ps(-yShift);
-    const __m512 DX       = _mm512_mul_ps(_mm512_set1_ps(dx), DX_FACTORS);
-    const __m512 DY       = _mm512_set1_ps(dy);
-    const __m512 CAMERA_X = _mm512_set1_ps(-camera->x - X_CENTER_SHIFT);
-    const __m512 CAMERA_Y = _mm512_set1_ps(-camera->y);
+    // for (int iy = 0; iy < camera->h; iy++)
+    // {
+    //     float x0 = (          - xShift) * dx - camera->x - X_CENTER_SHIFT;
+    //     float y0 = ((float)iy - yShift) * dy - camera->y;
 
-    for (int iy = 0; iy < camera->h; iy++)
-    {
-        float x0 = (          - xShift) * dx - camera->x - X_CENTER_SHIFT;
-        float y0 = ((float)iy - yShift) * dy - camera->y;
-
-        for (int ix = 0; ix < camera->w; ix += 512 / 32)
-        {
-            __m512 X0  = _mm512_add_ps(_mm512_mul_ps(X_SHIFT, DX), CAMERA_X);
-            __m512 Y0  = _mm512_add_ps(_mm512_mul_ps(_mm512_add_ps(_mm512_set1_ps((float)iy), Y_SHIFT), DY), CAMERA_Y);
-            __m512i N = _mm512_setzero_epi32();
-        }
-    }
+    //     for (int ix = 0; ix < camera->w; ix += 512 / 32)
+    //     {
+    //         __m512 X0  = _mm512_add_ps(_mm512_mul_ps(X_SHIFT, DX), CAMERA_X);
+    //         __m512 Y0  = _mm512_add_ps(_mm512_mul_ps(_mm512_add_ps(_mm512_set1_ps((float)iy), Y_SHIFT), DY), CAMERA_Y);
+    //         __m512i N = _mm512_setzero_epi32();
+    //     }
+    // }
 
     return EVERYTHING_FINE;
 }

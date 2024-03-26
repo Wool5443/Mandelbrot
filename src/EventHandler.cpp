@@ -13,10 +13,10 @@ void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running)
             break;
         case SDLK_EQUALS:
         case SDLK_PLUS:
-            camera->scale /= SCALE_GROW;
+            camera->scale *= SCALE_GROW;
             break;
         case SDLK_MINUS:
-            camera->scale *= SCALE_GROW;
+            camera->scale /= SCALE_GROW;
             break;
         case SDLK_LEFT:
         case SDLK_a:
@@ -52,10 +52,8 @@ void MouseButtonHandler(SDL_Event* e, Camera* camera)
     int dx = 0, dy = 0;
     SDL_GetRelativeMouseState(&dx, &dy);
 
-    float dragFact = camera->scale / (float)camera->w;
-
-    camera->x += (float)dx * dragFact;
-    camera->y += (float)dy * dragFact;
+    camera->x += (float)dx / camera->scale;
+    camera->y += (float)dy / camera->scale;
 }
 
 void MouseWheelHandler(SDL_Event* e, Camera* camera)
@@ -68,15 +66,16 @@ void MouseWheelHandler(SDL_Event* e, Camera* camera)
     if (e->wheel.y > 0) // zoom in
         zoomValue = WHEEL_FACT;
     else
-        zoomValue = 1 / WHEEL_FACT;
+        zoomValue = REVERSE_WHEEL_FACT;
 
-    GET_COORD_TRANSPOSE_PARAMS();
+    float xShift = (float)camera->w / 2.f;
+    float yShift = (float)camera->h / 2.f;
 
     int mouseX = e->wheel.mouseX - xShift;
     int mouseY = e->wheel.mouseY - yShift;
 
-    camera->x += (zoomValue - 1.f) * mouseX * dx;
-    camera->y += (zoomValue - 1.f) * mouseY * dy;
+    camera->x += (1 / zoomValue - 1.f) * mouseX / camera->scale;
+    camera->y += (1 / zoomValue - 1.f) * mouseY / camera->scale;
 
     camera->scale *= zoomValue;
 }

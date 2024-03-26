@@ -22,7 +22,7 @@ int main()
     {
         .w = surface->w,
         .h = surface->h,
-        .x = 0,
+        .x = DEFAULT_CAMERA_X,
         .y = 0,
         .scale = DEFAULT_SCALE,
     };
