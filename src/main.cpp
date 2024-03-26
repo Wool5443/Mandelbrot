@@ -63,7 +63,8 @@ int main()
         if (mouseDown)
             MouseButtonHandler(&e, &camera);
 
-        RETURN_ERROR(DrawMandelbrotTrivial(surface, &camera));
+        // RETURN_ERROR(DrawMandelbrotTrivial(surface, &camera));
+        RETURN_ERROR(DrawMandelbrotAVX512(surface, &camera));
 
         SDL_UpdateWindowSurface(window);
     }
