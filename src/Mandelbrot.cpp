@@ -16,9 +16,6 @@ static const int     N_MAX  = 256;
 static const float   R2_MAX = 10.f * 10.f;
 
 static const __m512 R2_MAX_512 = _mm512_set1_ps(R2_MAX);
-// static const __m512  DX_FACTORS  = _mm512_set_ps(0.f, 1.f, 2.f, 3.f, 4.f, 5.f, 6.f,
-//                                                 7.f, 8.f, 9.f, 10.f, 11.f, 12.f, 13.f,
-//                                                 14.f, 15.f);
 static const __m512 DX_FACTORS = _mm512_set_ps(15.f, 14.f, 13.f, 12.f, 11.f, 10.f,  9.f, 8.f,  
                                                 7.f,  6.f,  5.f,  4.f,  3.f,  2.f,  1.f, 0.f);
 
@@ -85,7 +82,6 @@ ErrorCode DrawMandelbrotTrivial(SDL_Surface* surface, Camera* camera)
 
 ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera)
 {
-
     MyAssertSoft(surface, ERROR_NULLPTR);
     MyAssertSoft(camera, ERROR_NULLPTR);
 
@@ -101,7 +97,6 @@ ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera)
     const __m512 CAMERA_X     = _mm512_set1_ps(-camera->x);
     const __m512 CAMERA_Y     = _mm512_set1_ps(-camera->y);
     const __m512 REV_SCALE    = _mm512_set1_ps(1 / camera->scale);
-    // each ix iteration X0_i += 16 * REV_SCALE
     const __m512 REV_SCALE_16 = _mm512_mul_ps(REV_SCALE, _mm512_set1_ps(16.f));
     const __m512 DX           = _mm512_mul_ps (REV_SCALE, DX_FACTORS);
 

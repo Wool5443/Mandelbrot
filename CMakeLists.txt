@@ -17,18 +17,14 @@ set(CMAKE_CXX_FLAGS_DEBUG
 -Wredundant-decls -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=2 -Wsuggest-attribute=noreturn                      \
 -Wsuggest-final-methods -Wsuggest-final-types -Wsuggest-override -Wswitch-default -Wsync-nand -Wundef -Wunreachable-code    \
 -Wunused -Wuseless-cast -Wvariadic-macros -Wno-literal-suffix -Wno-missing-field-initializers -Wno-narrowing                \
--Wno-old-style-cast -Wno-varargs -Wstack-protector -fcheck-new -fsized-deallocation -fstack-protector -fstrict-overflow     \
--flto-odr-type-merging -fno-omit-frame-pointer -pie -fPIE -Werror=vla")
+-Wno-old-style-cast -Wno-varargs -Wstack-protector")
 
 set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wno-switch -Wno-conversion -Wno-unused-variable -Wno-pointer-arith")
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -march=tigerlake -mavx512f")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=tigerlake -mavx512f")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=tigerlake -mavx512f -O3")
 
 set(EXECUTABLE "main")
-
-add_definitions("-DDEBUG")
-add_definitions("-DWAYLAND")
 
 set (SOURCES 
     "Utils/Utils.cpp"
