@@ -9,20 +9,7 @@ find_package(SDL2 REQUIRED)
 
 include_directories(${SDL2_INCLUDE_DIRS})
 
-set(CMAKE_CXX_FLAGS_DEBUG
-"-Wno-switch -Wno-conversion -Wno-unused-variable -Wno-pointer-arith -ggdb3 -Wall                                           \
--Wextra -Weffc++ -Waggressive-loop-optimizations -Wc++14-compat -Wmissing-declarations -Wcast-align -Wchar-subscripts       \
--Wconditionally-supported -Wctor-dtor-privacy -Wempty-body -Wformat-nonliteral -Wformat-security -Wformat-signedness        \
--Wformat=2 -Winline -Wlogical-op -Wnon-virtual-dtor -Wopenmp-simd -Woverloaded-virtual -Wpacked -Winit-self                 \
--Wredundant-decls -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=2 -Wsuggest-attribute=noreturn                      \
--Wsuggest-final-methods -Wsuggest-final-types -Wsuggest-override -Wswitch-default -Wsync-nand -Wundef -Wunreachable-code    \
--Wunused -Wuseless-cast -Wvariadic-macros -Wno-literal-suffix -Wno-missing-field-initializers -Wno-narrowing                \
--Wno-old-style-cast -Wno-varargs -Wstack-protector")
-
-set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wno-switch -Wno-conversion -Wno-unused-variable -Wno-pointer-arith")
-
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -march=tigerlake -mavx512f")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=tigerlake -mavx512f -O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-march=tigerlake -mavx512f -O3")
 
 set(EXECUTABLE "main")
 
