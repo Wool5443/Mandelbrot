@@ -62,6 +62,8 @@ ErrorCode DrawMandelbrotTrivial(SDL_Surface* surface, Camera* camera)
 
                 color = (0xff << ALPHA) + (r << RED) + (g << GREEN) + (b << BLUE);
             }
+
+            *(pixels + iy * camera->w + ix) = color;
         }
     }
 

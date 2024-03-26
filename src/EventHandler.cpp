@@ -65,17 +65,18 @@ void MouseWheelHandler(SDL_Event* e, Camera* camera)
 
     float zoomValue = 1;
 
-    if (e->wheel.y == 1) // zoom in
+    if (e->wheel.y > 0) // zoom in
         zoomValue = WHEEL_FACT;
     else
         zoomValue = 1 / WHEEL_FACT;
 
+    GET_COORD_TRANSPOSE_PARAMS();
+
+    int mouseX = e->wheel.mouseX - xShift;
+    int mouseY = e->wheel.mouseY - yShift;
+
+    camera->x += (zoomValue - 1.f) * mouseX * dx;
+    camera->y += (zoomValue - 1.f) * mouseY * dy;
+
     camera->scale *= zoomValue;
-
-    // float x = 0, y = 0;
-    // GET_COORD_TRANSPOSE_PARAMS();
-    // TRANSPOSE(x, y);
-
-    // camera->x -= x * zoomValue * 0.1f;
-    // camera->y -= y * zoomValue * 0.1f;
 }
