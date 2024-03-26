@@ -20,6 +20,8 @@ struct Camera
     float scale;
 };
 
+typedef ErrorCode (*DrawFunction_t)(SDL_Surface*, Camera*);
+
 /*
 * @brief Draws one frame of Mandelbrot using trivial approach
 * @param [in] surface - sdl surface of main window

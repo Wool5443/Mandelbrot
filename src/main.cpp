@@ -4,6 +4,8 @@
 #include "Mandelbrot.hpp"
 #include "EventHandler.hpp"
 
+static const uint8_t ALLIGN_WINDOW_16 = 0xF;
+
 int main()
 {
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -27,6 +29,9 @@ int main()
         .scale = DEFAULT_SCALE,
     };
 
+    // ErrorCode (*currentDrawer)(SDL_Surface*, Camera*) = DrawMandelbrotAVX512;
+    DrawFunction_t currentDrawer = DrawMandelbrotAVX512;
+
     while (running)
     {
         while (SDL_PollEvent(&e))
@@ -37,7 +42,7 @@ int main()
                     running = false;
                     break;
                 case SDL_KEYDOWN:
-                    KeyboardHandler(&e, &camera, &running);
+                    KeyboardHandler(&e, &camera, &running, &currentDrawer);
                     break;
                 case SDL_MOUSEBUTTONDOWN:
                     SDL_GetRelativeMouseState(nullptr, nullptr);
@@ -50,10 +55,12 @@ int main()
                     MouseWheelHandler(&e, &camera);
                     break;
                 case SDL_WINDOWEVENT:
-                    if (e.window.event == SDL_WINDOWEVENT_RESIZED) 
+                    if (e.window.event == SDL_WINDOWEVENT_RESIZED)
+                    {
                         surface = SDL_GetWindowSurface(window);
-                        camera.w = surface->w;
-                        camera.h = surface->h;
+                        camera.w = surface->w & ALLIGN_WINDOW_16;
+                        camera.h = surface->h & ALLIGN_WINDOW_16;
+                    }
                     break;
                 default:
                     break;
@@ -61,10 +68,9 @@ int main()
         }
 
         if (mouseDown)
-            MouseButtonHandler(&e, &camera);
+            MouseButtonHandler(&e, &camera, &currentDrawer);
 
-        // RETURN_ERROR(DrawMandelbrotTrivial(surface, &camera));
-        RETURN_ERROR(DrawMandelbrotAVX512(surface, &camera));
+        RETURN_ERROR(currentDrawer(surface, &camera));
 
         SDL_UpdateWindowSurface(window);
     }

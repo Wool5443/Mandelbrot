@@ -1,6 +1,6 @@
 #include "EventHandler.hpp"
 
-void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running)
+void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running, DrawFunction_t* currentDrawer)
 {
     MyAssertHard(e,       ERROR_NULLPTR);
     MyAssertHard(camera,  ERROR_NULLPTR);
@@ -10,6 +10,12 @@ void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running)
     {
         case SDLK_q:
             *running = false;
+            break;
+        case SDLK_r:
+            if (*currentDrawer == DrawMandelbrotAVX512)
+                *currentDrawer = DrawMandelbrotTrivial;
+            else
+                *currentDrawer = DrawMandelbrotAVX512;
             break;
         case SDLK_EQUALS:
         case SDLK_PLUS:
@@ -44,10 +50,20 @@ void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running)
     }
 }
 
-void MouseButtonHandler(SDL_Event* e, Camera* camera)
+void MouseButtonHandler(SDL_Event* e, Camera* camera, DrawFunction_t* currentDrawer)
+
 {
     MyAssertHard(e,      ERROR_NULLPTR);
     MyAssertHard(camera, ERROR_NULLPTR);
+
+    if (e->button.button == SDL_BUTTON_MIDDLE)
+    {
+       if (*currentDrawer == DrawMandelbrotAVX512)
+            *currentDrawer = DrawMandelbrotTrivial;
+        else
+            *currentDrawer = DrawMandelbrotAVX512; 
+        return;
+    }
 
     int dx = 0, dy = 0;
     SDL_GetRelativeMouseState(&dx, &dy);
