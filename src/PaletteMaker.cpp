@@ -46,11 +46,6 @@ static void _generateGradientRgGbBr()
         int i = n - NUMBER_OF_COLORS * 2 / 3;
         PALETTES[PALETTE_GRADIENT_RG_GB_BR][n] = (0xff << ALPHA) + ((NUMBER_OF_COLORS / 3 - i) * 3 << BLUE) + ((i * 3) << RED);
     }
-
-    for (int i = 0; i < NUMBER_OF_COLORS; i++)
-    {
-        printf("%d - %u\n", i, PALETTES[PALETTE_GRADIENT_RG_GB_BR][i]);
-    }
 }
 
 static void _generateGreyQaattuor()

@@ -1,14 +1,9 @@
 #include <immintrin.h>
-#include <array>
 #include "Mandelbrot.hpp"
+#include "PaletteMaker.hpp"
 
 static const int      SIMULTANEOUS_PIXELS = 8;
 static const uint32_t COLOR_INCREMENT     = 0x00110a09;
-
-static const char ALPHA = 24;
-static const char BLUE  = 16;
-static const char GREEN =  8;
-static const char RED   =  0;
 
 static const int    N_MAX  = 256;
 static const double R2_MAX = 10.f * 10.f;
@@ -39,7 +34,7 @@ ErrorCode DrawMandelbrotNaive(SDL_Surface* surface, Camera* camera, const uint32
 
             int N = 0;
 
-            while (N < N_MAX)
+            for (; N < N_MAX; N++)
             {
                 const float x2 = x * x;
                 const float y2 = y * y;
@@ -52,11 +47,9 @@ ErrorCode DrawMandelbrotNaive(SDL_Surface* surface, Camera* camera, const uint32
 
                 x = x2 - y2 + x0;
                 y = xy + xy + y0;
-
-                N++;
             }
 
-            *(pixels + iy * camera->w + ix) = palette[N];
+            *(pixels + iy * camera->w + ix) = palette[N % NUMBER_OF_COLORS];
         }
     }
 
@@ -95,7 +88,7 @@ ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera, const uint3
 
             __m512d X = X0, Y = Y0;
 
-            __m512i   colors       = _mm512_set1_epi32(palette[0]);
+            __m512i  colors        = _mm512_set1_epi32(palette[0]);
             __mmask8 notYetInfinte = 0xFF;
 
             for (int n = 0; n < N_MAX; n++)
@@ -104,13 +97,13 @@ ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera, const uint3
                 __m512d Y2 = _mm512_mul_pd(Y, Y);
                 __m512d XY = _mm512_mul_pd(X, Y);
 
-                __mmask8 cmp                = _mm512_cmplt_pd_mask(_mm512_add_pd(X2, Y2), R2_MAX_512);
+                __mmask8 cmp                 = _mm512_cmplt_pd_mask(_mm512_add_pd(X2, Y2), R2_MAX_512);
                 __mmask8 pixelsToChangeColor = cmp ^ notYetInfinte; // if pixel is finite not color
                 notYetInfinte               &= cmp;
 
                 colors = _mm512_mask_set1_epi32(colors, pixelsToChangeColor, palette[n]);
 
-                if (!notYetInfinte) break;
+                if (!cmp) break;
 
                 X = _mm512_add_pd(_mm512_sub_pd(X2, Y2), X0);
                 Y = _mm512_add_pd(_mm512_add_pd(XY, XY), Y0);
