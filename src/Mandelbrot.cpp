@@ -2,24 +2,21 @@
 #include <array>
 #include "Mandelbrot.hpp"
 
-inline int _setColors();
+static const int      SIMULTANEOUS_PIXELS = 8;
+static const uint32_t COLOR_INCREMENT     = 0x00110a09;
 
-static const int      SIMULTANEOUS_PIXELS = 16;
-static const uint32_t COLOR_INCREMENT     = 0x00010101;
+static const char ALPHA = 24;
+static const char BLUE  = 16;
+static const char GREEN =  8;
+static const char RED   =  0;
 
-static const char    ALPHA = 24;
-static const char    BLUE  = 16;
-static const char    GREEN =  8;
-static const char    RED   =  0;
+static const int    N_MAX  = 256;
+static const double R2_MAX = 10.f * 10.f;
 
-static const int     N_MAX  = 256;
-static const float   R2_MAX = 10.f * 10.f;
+static const __m512d R2_MAX_512 = _mm512_set1_pd(R2_MAX);
+static const __m512d DX_FACTORS = _mm512_set_pd (7.f,  6.f,  5.f,  4.f,  3.f,  2.f,  1.f, 0.f);
 
-static const __m512 R2_MAX_512 = _mm512_set1_ps(R2_MAX);
-static const __m512 DX_FACTORS = _mm512_set_ps(15.f, 14.f, 13.f, 12.f, 11.f, 10.f,  9.f, 8.f,  
-                                                7.f,  6.f,  5.f,  4.f,  3.f,  2.f,  1.f, 0.f);
-
-ErrorCode DrawMandelbrotTrivial(SDL_Surface* surface, Camera* camera)
+ErrorCode DrawMandelbrotTrivial(SDL_Surface* surface, Camera* camera, const uint32_t* palette)
 {
     MyAssertSoft(surface, ERROR_NULLPTR);
     MyAssertSoft(camera, ERROR_NULLPTR);
@@ -28,8 +25,8 @@ ErrorCode DrawMandelbrotTrivial(SDL_Surface* surface, Camera* camera)
 
     uint32_t* pixels = (uint32_t*)surface->pixels;
 
-    const float xShift = (float)camera->w / 2.f;
-    const float yShift = (float)camera->h / 2.f;
+    const float xShift = (double)camera->w / 2.f;
+    const float yShift = (double)camera->h / 2.f;
 
     for (int iy = 0; iy < camera->h; iy++)
     {
@@ -59,19 +56,7 @@ ErrorCode DrawMandelbrotTrivial(SDL_Surface* surface, Camera* camera)
                 N++;
             }
 
-            uint32_t color = 0xff << 24;
-            if (N < N_MAX)
-            {
-                char c = (char)(sqrtf(sqrtf((float)N / (float)N_MAX)) * (float)N_MAX);
-
-                char r = c;
-                char g = c;
-                char b = c;
-
-                color = (0xff << ALPHA) + (r << RED) + (g << GREEN) + (b << BLUE);
-            }
-
-            *(pixels + iy * camera->w + ix) = color;
+            *(pixels + iy * camera->w + ix) = palette[N];
         }
     }
 
@@ -80,7 +65,7 @@ ErrorCode DrawMandelbrotTrivial(SDL_Surface* surface, Camera* camera)
     return EVERYTHING_FINE;
 }
 
-ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera)
+ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera, const uint32_t* palette)
 {
     MyAssertSoft(surface, ERROR_NULLPTR);
     MyAssertSoft(camera, ERROR_NULLPTR);
@@ -89,16 +74,15 @@ ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera)
 
     uint32_t* pixels = (uint32_t*)surface->pixels;
 
-    const float xShift = (float)camera->w / 2.f;
-    const float yShift = (float)camera->h / 2.f;
+    const double xShift = (double)camera->w / 2.f;
+    const double yShift = (double)camera->h / 2.f;
 
-    const __m512 X_SHIFT      = _mm512_set1_ps(-xShift);
-    const __m512 Y_SHIFT      = _mm512_set1_ps(-yShift);
-    const __m512 CAMERA_X     = _mm512_set1_ps(-camera->x);
-    const __m512 CAMERA_Y     = _mm512_set1_ps(-camera->y);
-    const __m512 REV_SCALE    = _mm512_set1_ps(1 / camera->scale);
-    const __m512 REV_SCALE_16 = _mm512_mul_ps(REV_SCALE, _mm512_set1_ps(16.f));
-    const __m512 DX           = _mm512_mul_ps (REV_SCALE, DX_FACTORS);
+    const __m512d X_SHIFT   = _mm512_set1_pd(-xShift);
+    const __m512d Y_SHIFT   = _mm512_set1_pd(-yShift);
+    const __m512d CAMERA_X  = _mm512_set1_pd(-camera->x);
+    const __m512d CAMERA_Y  = _mm512_set1_pd(-camera->y);
+    const __m512d REV_SCALE = _mm512_set1_pd(1 / camera->scale);
+    const __m512d DX        = _mm512_mul_pd (REV_SCALE, DX_FACTORS);
 
     for (int iy = 0; iy < camera->h; iy++)
     {
@@ -107,36 +91,33 @@ ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera)
 
         for (int ix = 0; ix < camera->w; ix += SIMULTANEOUS_PIXELS)
         {
-            const float  x0 = ((float)ix - xShift) / camera->scale - camera->x;
-            const float  y0 = ((float)iy - xShift) / camera->scale - camera->y;
+            const double  x0 = ((double)ix - xShift) / camera->scale - camera->x;
+            const double  y0 = ((double)iy - yShift) / camera->scale - camera->y;
 
-            const __m512 X0 = _mm512_add_ps(_mm512_set1_ps(x0), DX);
-            const __m512 Y0 = _mm512_set1_ps(y0);
+            const __m512d X0 = _mm512_add_pd(_mm512_set1_pd(x0), DX);
+            const __m512d Y0 = _mm512_set1_pd(y0);
 
-            __m512 X = X0, Y = Y0;
+            __m512d X = X0, Y = Y0;
 
-            __m512i   colors        = _mm512_setzero_epi32();
-            uint32_t  currentColor  = 0xff000000;
+            __m512i   colors        = _mm512_set1_epi32(palette[0]);
             __mmask16 notYetInfinte = 0xFFFF;
 
             for (int n = 0; n < N_MAX; n++)
             {
-                __m512 X2 = _mm512_mul_ps(X, X);
-                __m512 Y2 = _mm512_mul_ps(Y, Y);
-                __m512 XY = _mm512_mul_ps(X, Y);
+                __m512d X2 = _mm512_mul_pd(X, X);
+                __m512d Y2 = _mm512_mul_pd(Y, Y);
+                __m512d XY = _mm512_mul_pd(X, Y);
 
-                __mmask16 cmp                = _mm512_cmplt_ps_mask(_mm512_add_ps(X2, Y2), R2_MAX_512);
+                __mmask16 cmp                = _mm512_cmplt_pd_mask(_mm512_add_pd(X2, Y2), R2_MAX_512);
                 __mmask16 pixelToChangeColor = cmp ^ notYetInfinte; // if pixel is finite not color
                 notYetInfinte               &= cmp;
 
-                colors = _mm512_mask_set1_epi32(colors, pixelToChangeColor, currentColor);
+                colors = _mm512_mask_set1_epi32(colors, pixelToChangeColor, palette[n]);
 
-                // if (!cmp) break;
+                if (!cmp) break;
 
-                X = _mm512_add_ps(_mm512_sub_ps(X2, Y2), X0);
-                Y = _mm512_add_ps(_mm512_add_ps(XY, XY), Y0);
-
-                currentColor += COLOR_INCREMENT;
+                X = _mm512_add_pd(_mm512_sub_pd(X2, Y2), X0);
+                Y = _mm512_add_pd(_mm512_add_pd(XY, XY), Y0);
             }
 
             _mm512_storeu_epi32(pixelsRow, colors);

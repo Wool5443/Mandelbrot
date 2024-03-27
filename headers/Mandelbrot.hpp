@@ -15,12 +15,12 @@ struct Camera
     int   w;
     int   h;
 
-    float x;
-    float y;
-    float scale;
+    double x;
+    double y;
+    double scale;
 };
 
-typedef ErrorCode (*DrawFunction_t)(SDL_Surface*, Camera*);
+typedef ErrorCode (*DrawFunction_t)(SDL_Surface*, Camera*, const uint32_t*);
 
 /*
 * @brief Draws one frame of Mandelbrot using trivial approach
@@ -29,7 +29,7 @@ typedef ErrorCode (*DrawFunction_t)(SDL_Surface*, Camera*);
 *
 * @return error
 */
-ErrorCode DrawMandelbrotTrivial(SDL_Surface* surface, Camera* camera);
+ErrorCode DrawMandelbrotTrivial(SDL_Surface* surface, Camera* camera, const uint32_t* palette);
 
 /*
 * @brief Draws one frame of Mandelbrot using trivial approach
@@ -38,4 +38,4 @@ ErrorCode DrawMandelbrotTrivial(SDL_Surface* surface, Camera* camera);
 *
 * @return error
 */
-ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera);
+ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera, const uint32_t* palette);

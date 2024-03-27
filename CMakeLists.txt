@@ -19,8 +19,10 @@ set (SOURCES
     "src/main.cpp"
     "src/Mandelbrot.cpp"
     "src/EventHandler.cpp"
+    "src/PaletteMaker.cpp"
     "headers/EventHandler.hpp"
     "headers/Mandelbrot.hpp"
+    "headers/PaletteMaker.hpp"
 )
 
 include_directories(headers Utils)

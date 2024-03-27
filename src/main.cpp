@@ -1,10 +1,11 @@
 #include <SDL2/SDL.h>
+#include "PaletteMaker.hpp"
 #include "Utils.hpp"
 #include "WindowProperties.hpp"
 #include "Mandelbrot.hpp"
 #include "EventHandler.hpp"
 
-static const uint8_t ALLIGN_WINDOW_16 = 0xF;
+static const int ALLIGN_WINDOW_16 = ~0x7;
 
 int main()
 {
@@ -29,8 +30,9 @@ int main()
         .scale = DEFAULT_SCALE,
     };
 
-    // ErrorCode (*currentDrawer)(SDL_Surface*, Camera*) = DrawMandelbrotAVX512;
     DrawFunction_t currentDrawer = DrawMandelbrotAVX512;
+
+    const uint32_t* palette = GetPalette(DEFAULT_PALETTE);
 
     while (running)
     {
@@ -42,7 +44,7 @@ int main()
                     running = false;
                     break;
                 case SDL_KEYDOWN:
-                    KeyboardHandler(&e, &camera, &running, &currentDrawer);
+                    KeyboardHandler(&e, &camera, &running, &currentDrawer, &palette);
                     break;
                 case SDL_MOUSEBUTTONDOWN:
                     SDL_GetRelativeMouseState(nullptr, nullptr);
@@ -57,9 +59,12 @@ int main()
                 case SDL_WINDOWEVENT:
                     if (e.window.event == SDL_WINDOWEVENT_RESIZED)
                     {
+                        camera.w = e.window.data1 & ALLIGN_WINDOW_16;
+                        camera.h = e.window.data2;
+                        printf("w = %d h = %d\n", camera.w, camera.h);
+
+                        SDL_SetWindowSize(window, camera.w, camera.h);
                         surface = SDL_GetWindowSurface(window);
-                        camera.w = surface->w & ALLIGN_WINDOW_16;
-                        camera.h = surface->h & ALLIGN_WINDOW_16;
                     }
                     break;
                 default:
@@ -70,7 +75,7 @@ int main()
         if (mouseDown)
             MouseButtonHandler(&e, &camera, &currentDrawer);
 
-        RETURN_ERROR(currentDrawer(surface, &camera));
+        RETURN_ERROR(currentDrawer(surface, &camera, palette));
 
         SDL_UpdateWindowSurface(window);
     }

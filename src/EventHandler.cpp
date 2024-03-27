@@ -1,6 +1,8 @@
 #include "EventHandler.hpp"
+#include "PaletteMaker.hpp"
 
-void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running, DrawFunction_t* currentDrawer)
+void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running, DrawFunction_t* currentDrawer,
+                    const uint32_t** palette)
 {
     MyAssertHard(e,       ERROR_NULLPTR);
     MyAssertHard(camera,  ERROR_NULLPTR);
@@ -8,7 +10,7 @@ void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running, DrawFunction_t
 
     switch (e->key.keysym.sym)
     {
-        case SDLK_q:
+        case SDLK_x:
             *running = false;
             break;
         case SDLK_r:
@@ -16,6 +18,12 @@ void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running, DrawFunction_t
                 *currentDrawer = DrawMandelbrotTrivial;
             else
                 *currentDrawer = DrawMandelbrotAVX512;
+            break;
+        case SDLK_e:
+            *palette = GetNextPalette();
+            break;
+        case SDLK_q:
+            *palette = GetPreviousPalette();
             break;
         case SDLK_EQUALS:
         case SDLK_PLUS:
@@ -51,7 +59,6 @@ void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running, DrawFunction_t
 }
 
 void MouseButtonHandler(SDL_Event* e, Camera* camera, DrawFunction_t* currentDrawer)
-
 {
     MyAssertHard(e,      ERROR_NULLPTR);
     MyAssertHard(camera, ERROR_NULLPTR);
@@ -68,8 +75,8 @@ void MouseButtonHandler(SDL_Event* e, Camera* camera, DrawFunction_t* currentDra
     int dx = 0, dy = 0;
     SDL_GetRelativeMouseState(&dx, &dy);
 
-    camera->x += (float)dx / camera->scale;
-    camera->y += (float)dy / camera->scale;
+    camera->x += (double)dx / camera->scale;
+    camera->y += (double)dy / camera->scale;
 }
 
 void MouseWheelHandler(SDL_Event* e, Camera* camera)
@@ -77,15 +84,15 @@ void MouseWheelHandler(SDL_Event* e, Camera* camera)
     MyAssertHard(e,      ERROR_NULLPTR);
     MyAssertHard(camera, ERROR_NULLPTR);
 
-    float zoomValue = 1;
+    double zoomValue = 1;
 
     if (e->wheel.y > 0) // zoom in
         zoomValue = WHEEL_FACT;
     else
         zoomValue = REVERSE_WHEEL_FACT;
 
-    float xShift = (float)camera->w / 2.f;
-    float yShift = (float)camera->h / 2.f;
+    double xShift = (double)camera->w / 2.f;
+    double yShift = (double)camera->h / 2.f;
 
     int mouseX = e->wheel.mouseX - xShift;
     int mouseY = e->wheel.mouseY - yShift;
