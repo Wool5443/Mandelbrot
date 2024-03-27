@@ -1,25 +1,37 @@
+#include <time.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include "PaletteMaker.hpp"
 #include "Utils.hpp"
 #include "WindowProperties.hpp"
 #include "Mandelbrot.hpp"
 #include "EventHandler.hpp"
+#include "Benchmark.hpp"
+
+extern "C" uint64_t GetCPUTicks();
 
 static const int ALLIGN_WINDOW_16 = ~0x7;
 
 int main()
 {
     SDL_Init(SDL_INIT_EVERYTHING);
+    IMG_Init(IMG_INIT_PNG);
 
     SDL_Window* window = SDL_CreateWindow(WINDOW_TITLE, -1, -1, WINDOW_WIDTH, WINDOW_HEIGHT,
                                           SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    RETURN_ERROR(!window, SDL_GetError());
 
     SDL_Event e = {};
-
-    SDL_Surface* surface = SDL_GetWindowSurface(window);
-
     bool running   = true;
     bool mouseDown = false;
+
+    SDL_Surface* surface = SDL_GetWindowSurface(window);
+    SDL_Surface* digits  = IMG_Load(DIGITS_PATH);
+    RETURN_ERROR(!surface, SDL_GetError());
+    RETURN_ERROR(!digits, SDL_GetError());
+
+    DrawFunction_t currentDrawer = DrawMandelbrotAVX512;
+    const uint32_t* palette = GetPalette(DEFAULT_PALETTE);
 
     Camera camera = 
     {
@@ -30,9 +42,8 @@ int main()
         .scale = DEFAULT_SCALE,
     };
 
-    DrawFunction_t currentDrawer = DrawMandelbrotAVX512;
-
-    const uint32_t* palette = GetPalette(DEFAULT_PALETTE);
+    timespec start = {};
+    timespec end   = {};
 
     while (running)
     {
@@ -75,7 +86,13 @@ int main()
         if (mouseDown)
             MouseButtonHandler(&e, &camera, &currentDrawer);
 
+
+        uint64_t start = SDL_GetTicks64();
         RETURN_ERROR(currentDrawer(surface, &camera, palette));
+        uint64_t end   = SDL_GetTicks64();
+
+        // ShowFps(surface, digits, (int)(1000. / (double)(end - start)));
+        ShowFps(surface, digits, GetCPUTicks());
 
         SDL_UpdateWindowSurface(window);
     }

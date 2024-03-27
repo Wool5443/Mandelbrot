@@ -1,6 +1,6 @@
 CMakeCache.txt
 cmake_install.cmake
 CMakeFiles/*
-main
+Mandelbrot
 Makefile
 .vscode/*

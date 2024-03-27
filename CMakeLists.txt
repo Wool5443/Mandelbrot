@@ -1,17 +1,24 @@
 cmake_minimum_required(VERSION 3.5)
+set(projectName "Mandelbrot")
 
-project("Mandelbrot")
+set(CMAKE_NASM_LINK_EXECUTABLE "ld <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+set(CAN_USE_ASSEMBLER TRUE)
+set(CMAKE_ASM_NASM_OBJECT_FORMAT elf64)
+
+enable_language(ASM_NASM)
+project(${projectName} CXX ASM_NASM)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 
 find_package(SDL2 REQUIRED)
+find_package(SDL2_image REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(SDL2 REQUIRED sdl2 SDL2_image)
 
-include_directories(${SDL2_INCLUDE_DIRS})
+include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS})
 
-set(CMAKE_CXX_FLAGS_RELEASE "-march=tigerlake -mavx512f -O3")
-
-set(EXECUTABLE "main")
+set(CMAKE_CXX_FLAGS_RELEASE "-march=tigerlake -mavx512f -O3 -m64")
 
 set (SOURCES 
     "Utils/Utils.cpp"
@@ -20,13 +27,17 @@ set (SOURCES
     "src/Mandelbrot.cpp"
     "src/EventHandler.cpp"
     "src/PaletteMaker.cpp"
+    "src/Benchmark.cpp"
+    "src/CPUTickTimer.asm"
     "headers/EventHandler.hpp"
     "headers/Mandelbrot.hpp"
     "headers/PaletteMaker.hpp"
+    "headers/Benchmark.hpp"
 )
 
 include_directories(headers Utils)
 
-add_executable(${EXECUTABLE} ${SOURCES})
+add_executable(${projectName} ${SOURCES})
+# set_target_properties(${projectName} PROPERTIES LINKER_LANGUAGE ASM_NASM)
 
-target_link_libraries(${EXECUTABLE} ${SDL2_LIBRARIES})
+target_link_libraries(${projectName} ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})
