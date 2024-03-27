@@ -8,8 +8,6 @@
 #include "EventHandler.hpp"
 #include "Benchmark.hpp"
 
-extern "C" uint64_t GetCPUTicks();
-
 static const int ALLIGN_WINDOW_16 = ~0x7;
 
 int main()
@@ -86,16 +84,18 @@ int main()
         if (mouseDown)
             MouseButtonHandler(&e, &camera, &currentDrawer);
 
-
         uint64_t start = SDL_GetTicks64();
-        RETURN_ERROR(currentDrawer(surface, &camera, palette));
+        currentDrawer(surface, &camera, palette);
         uint64_t end   = SDL_GetTicks64();
 
-        // ShowFps(surface, digits, (int)(1000. / (double)(end - start)));
-        ShowFps(surface, digits, GetCPUTicks());
+        ShowFps(surface, digits, (int)(1000. / (double)(end - start)));
 
         SDL_UpdateWindowSurface(window);
     }
+
+    uint64_t ticks = RunBenchmark(currentDrawer, surface, &camera, (uint32_t*)palette);
+
+    printf("%d runs took %llu ticks\n", RUN_TIMES, ticks);
 
     SDL_DestroyWindow(window);
     SDL_Quit();

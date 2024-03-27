@@ -32,10 +32,10 @@ static void _generateGradientRgGbBr()
     for (int i = 0; i < NUMBER_OF_COLORS / 3; i++)
         PALETTES[PALETTE_GRADIENT_RG_GB_BR][i] = (0xff << ALPHA) + ((NUMBER_OF_COLORS / 3 - i) * 3 << RED) + ((i * 3) << GREEN);
     // (0, 255, 0) -> (0, 0, 255)
-    for (int i = NUMBER_OF_COLORS / 3 + 1; i < 2 * NUMBER_OF_COLORS / 3; i++)
+    for (int i = NUMBER_OF_COLORS / 3; i < 2 * NUMBER_OF_COLORS / 3; i++)
         PALETTES[PALETTE_GRADIENT_RG_GB_BR][i] = (0xff << ALPHA) + ((NUMBER_OF_COLORS / 3 - i) * 3 << GREEN) + ((i * 3) << BLUE);
     // (0, 0, 255) -> (255, 0, 0)
-    for (int i = 2 * NUMBER_OF_COLORS / 3 + 1; i < NUMBER_OF_COLORS; i++)
+    for (int i = 2 * NUMBER_OF_COLORS / 3; i < NUMBER_OF_COLORS; i++)
         PALETTES[PALETTE_GRADIENT_RG_GB_BR][i] = (0xff << ALPHA) + ((NUMBER_OF_COLORS / 3 - i) * 3 << BLUE) + ((i * 3) << RED);
 }
 
@@ -46,7 +46,6 @@ static void _generateGreyQaattuor()
         char c = (char)(sqrt(sqrt((double)i / NUMBER_OF_COLORS)) * (double)NUMBER_OF_COLORS); 
         PALETTES[PALETTE_GREY_QUATTUOR][i] = (0xff << ALPHA) + (c << RED) + (c << GREEN) + (c << BLUE);
     }
-
 }
 
 static int _generatePalettes()

@@ -77,30 +77,26 @@ ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera, const uint3
     const double xShift = (double)camera->w / 2.f;
     const double yShift = (double)camera->h / 2.f;
 
-    const __m512d X_SHIFT   = _mm512_set1_pd(-xShift);
-    const __m512d Y_SHIFT   = _mm512_set1_pd(-yShift);
-    const __m512d CAMERA_X  = _mm512_set1_pd(-camera->x);
-    const __m512d CAMERA_Y  = _mm512_set1_pd(-camera->y);
-    const __m512d REV_SCALE = _mm512_set1_pd(1 / camera->scale);
-    const __m512d DX        = _mm512_mul_pd (REV_SCALE, DX_FACTORS);
+    const __m512d DX = _mm512_mul_pd (_mm512_set1_pd(1 / camera->scale), DX_FACTORS);
 
     for (int iy = 0; iy < camera->h; iy++)
     {
         uint32_t* pixelsRow = pixels;
         pixels += camera->w;
 
+        const double  y0 = ((double)iy - yShift) / camera->scale - camera->y;
+        const __m512d Y0 = _mm512_set1_pd(y0);
+
         for (int ix = 0; ix < camera->w; ix += SIMULTANEOUS_PIXELS)
         {
             const double  x0 = ((double)ix - xShift) / camera->scale - camera->x;
-            const double  y0 = ((double)iy - yShift) / camera->scale - camera->y;
 
             const __m512d X0 = _mm512_add_pd(_mm512_set1_pd(x0), DX);
-            const __m512d Y0 = _mm512_set1_pd(y0);
 
             __m512d X = X0, Y = Y0;
 
-            __m512i   colors        = _mm512_set1_epi32(palette[0]);
-            __mmask16 notYetInfinte = 0xFFFF;
+            __m512i   colors       = _mm512_set1_epi32(palette[0]);
+            __mmask8 notYetInfinte = 0xFF;
 
             for (int n = 0; n < N_MAX; n++)
             {
@@ -108,13 +104,13 @@ ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera, const uint3
                 __m512d Y2 = _mm512_mul_pd(Y, Y);
                 __m512d XY = _mm512_mul_pd(X, Y);
 
-                __mmask16 cmp                = _mm512_cmplt_pd_mask(_mm512_add_pd(X2, Y2), R2_MAX_512);
-                __mmask16 pixelToChangeColor = cmp ^ notYetInfinte; // if pixel is finite not color
+                __mmask8 cmp                = _mm512_cmplt_pd_mask(_mm512_add_pd(X2, Y2), R2_MAX_512);
+                __mmask8 pixelToChangeColor = cmp ^ notYetInfinte; // if pixel is finite not color
                 notYetInfinte               &= cmp;
 
                 colors = _mm512_mask_set1_epi32(colors, pixelToChangeColor, palette[n]);
 
-                if (!cmp) break;
+                if (!notYetInfinte) break;
 
                 X = _mm512_add_pd(_mm512_sub_pd(X2, Y2), X0);
                 Y = _mm512_add_pd(_mm512_add_pd(XY, XY), Y0);
