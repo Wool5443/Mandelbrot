@@ -29,14 +29,28 @@ static void _generateBW()
 static void _generateGradientRgGbBr()
 {
     // (255, 0, 0) -> (0, 255, 0)
-    for (int i = 0; i < NUMBER_OF_COLORS / 3; i++)
-        PALETTES[PALETTE_GRADIENT_RG_GB_BR][i] = (0xff << ALPHA) + ((NUMBER_OF_COLORS / 3 - i) * 3 << RED) + ((i * 3) << GREEN);
+    for (int n = 0; n < NUMBER_OF_COLORS / 3; n++)
+    {
+        int i = n;
+        PALETTES[PALETTE_GRADIENT_RG_GB_BR][n] = (0xff << ALPHA) + ((NUMBER_OF_COLORS / 3 - i) * 3 << RED) + ((i * 3) << GREEN);
+    }
     // (0, 255, 0) -> (0, 0, 255)
-    for (int i = NUMBER_OF_COLORS / 3; i < 2 * NUMBER_OF_COLORS / 3; i++)
-        PALETTES[PALETTE_GRADIENT_RG_GB_BR][i] = (0xff << ALPHA) + ((NUMBER_OF_COLORS / 3 - i) * 3 << GREEN) + ((i * 3) << BLUE);
+    for (int n = NUMBER_OF_COLORS / 3; n < 2 * NUMBER_OF_COLORS / 3; n++)
+    {
+        int i = n - NUMBER_OF_COLORS / 3;
+        PALETTES[PALETTE_GRADIENT_RG_GB_BR][n] = (0xff << ALPHA) + ((NUMBER_OF_COLORS / 3 - i) * 3 << GREEN) + ((i * 3) << BLUE);
+    }
     // (0, 0, 255) -> (255, 0, 0)
-    for (int i = 2 * NUMBER_OF_COLORS / 3; i < NUMBER_OF_COLORS; i++)
-        PALETTES[PALETTE_GRADIENT_RG_GB_BR][i] = (0xff << ALPHA) + ((NUMBER_OF_COLORS / 3 - i) * 3 << BLUE) + ((i * 3) << RED);
+    for (int n = 2 * NUMBER_OF_COLORS / 3; n < NUMBER_OF_COLORS; n++)
+    {
+        int i = n - NUMBER_OF_COLORS * 2 / 3;
+        PALETTES[PALETTE_GRADIENT_RG_GB_BR][n] = (0xff << ALPHA) + ((NUMBER_OF_COLORS / 3 - i) * 3 << BLUE) + ((i * 3) << RED);
+    }
+
+    for (int i = 0; i < NUMBER_OF_COLORS; i++)
+    {
+        printf("%d - %u\n", i, PALETTES[PALETTE_GRADIENT_RG_GB_BR][i]);
+    }
 }
 
 static void _generateGreyQaattuor()

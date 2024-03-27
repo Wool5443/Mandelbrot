@@ -22,6 +22,7 @@ int main()
     SDL_Event e = {};
     bool running   = true;
     bool mouseDown = false;
+    bool runBench  = false;
 
     SDL_Surface* surface = SDL_GetWindowSurface(window);
     SDL_Surface* digits  = IMG_Load(DIGITS_PATH);
@@ -53,7 +54,7 @@ int main()
                     running = false;
                     break;
                 case SDL_KEYDOWN:
-                    KeyboardHandler(&e, &camera, &running, &currentDrawer, &palette);
+                    KeyboardHandler(&e, &camera, &running, &runBench, &currentDrawer, &palette);
                     break;
                 case SDL_MOUSEBUTTONDOWN:
                     SDL_GetRelativeMouseState(nullptr, nullptr);
@@ -93,9 +94,15 @@ int main()
         SDL_UpdateWindowSurface(window);
     }
 
-    uint64_t ticks = RunBenchmark(currentDrawer, surface, &camera, (uint32_t*)palette);
+    if (runBench)
+    {
+        uint64_t ticksNaive = RunBenchmark(DrawMandelbrotNaive, surface, &camera, (uint32_t*)palette);
+        uint64_t ticksAVX   = RunBenchmark(DrawMandelbrotAVX512, surface, &camera, (uint32_t*)palette);
 
-    printf("%d runs took %llu ticks\n", RUN_TIMES, ticks);
+        printf("Naive:%d runs took %llu ticks\n", RUN_TIMES, ticksNaive);
+        printf("AVX  :%d runs took %llu ticks\n", RUN_TIMES, ticksAVX);
+        printf("Naive / AVX = %.4lg\n", (double)ticksNaive / (double)ticksAVX);
+    }
 
     SDL_DestroyWindow(window);
     SDL_Quit();

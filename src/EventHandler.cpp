@@ -1,7 +1,8 @@
 #include "EventHandler.hpp"
 #include "PaletteMaker.hpp"
 
-void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running, DrawFunction_t* currentDrawer,
+
+void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running, bool* runBench, DrawFunction_t* currentDrawer,
                     const uint32_t** palette)
 {
     MyAssertHard(e,       ERROR_NULLPTR);
@@ -13,9 +14,13 @@ void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running, DrawFunction_t
         case SDLK_x:
             *running = false;
             break;
+        case SDLK_b:
+            *running = false;
+            *runBench = true;
+            break;
         case SDLK_r:
             if (*currentDrawer == DrawMandelbrotAVX512)
-                *currentDrawer = DrawMandelbrotTrivial;
+                *currentDrawer = DrawMandelbrotNaive;
             else
                 *currentDrawer = DrawMandelbrotAVX512;
             break;
@@ -34,25 +39,25 @@ void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running, DrawFunction_t
             break;
         case SDLK_LEFT:
         case SDLK_a:
-            camera->x     += COORD_STEP;
+            camera->x     += COORD_STEP / camera->scale;
             break;
         case SDLK_RIGHT:
         case SDLK_d:
-            camera->x     -= COORD_STEP;
+            camera->x     -= COORD_STEP / camera->scale;
             break;
         case SDLK_UP:
         case SDLK_w:
-            camera->y     += COORD_STEP;
+            camera->y     += COORD_STEP / camera->scale;
             break;
         case SDLK_DOWN:
         case SDLK_s:
-            camera->y     -= COORD_STEP;
+            camera->y     -= COORD_STEP / camera->scale;
             break;
         default:
             break;
         case SDLK_c:
             camera->scale = DEFAULT_SCALE;
-            camera->x     = 0.f;
+            camera->x     = DEFAULT_CAMERA_X;
             camera->y     = 0.f;
             break;
     }
@@ -66,7 +71,7 @@ void MouseButtonHandler(SDL_Event* e, Camera* camera, DrawFunction_t* currentDra
     if (e->button.button == SDL_BUTTON_MIDDLE)
     {
        if (*currentDrawer == DrawMandelbrotAVX512)
-            *currentDrawer = DrawMandelbrotTrivial;
+            *currentDrawer = DrawMandelbrotNaive;
         else
             *currentDrawer = DrawMandelbrotAVX512; 
         return;

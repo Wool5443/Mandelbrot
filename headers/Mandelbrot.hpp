@@ -29,7 +29,7 @@ typedef ErrorCode (*DrawFunction_t)(SDL_Surface*, Camera*, const uint32_t*);
 *
 * @return error
 */
-ErrorCode DrawMandelbrotTrivial(SDL_Surface* surface, Camera* camera, const uint32_t* palette);
+ErrorCode DrawMandelbrotNaive(SDL_Surface* surface, Camera* camera, const uint32_t* palette);
 
 /*
 * @brief Draws one frame of Mandelbrot using trivial approach
