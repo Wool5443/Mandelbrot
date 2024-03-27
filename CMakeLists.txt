@@ -38,6 +38,5 @@ set (SOURCES
 include_directories(headers Utils)
 
 add_executable(${projectName} ${SOURCES})
-# set_target_properties(${projectName} PROPERTIES LINKER_LANGUAGE ASM_NASM)
 
 target_link_libraries(${projectName} ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})
