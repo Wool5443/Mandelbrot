@@ -3,12 +3,12 @@
 #include <SDL2/SDL.h>
 #include "Utils.hpp"
 
-static const float DEFAULT_SCALE      = 300.f;
-static const float DEFAULT_CAMERA_X   = 0.4f;
-static const float COORD_STEP         = 0.1f;
-static const float SCALE_GROW         = 1.1f;
-static const float WHEEL_FACT         = 1.1f;
-static const float REVERSE_WHEEL_FACT = 1 / WHEEL_FACT;
+static const double DEFAULT_SCALE      = 300.;
+static const double DEFAULT_CAMERA_X   = 0.4;
+static const double COORD_STEP         = 10.;
+static const double SCALE_GROW         = 1.1;
+static const double WHEEL_FACT         = 1.1;
+static const double REVERSE_WHEEL_FACT = 1 / WHEEL_FACT;
 
 struct Camera
 {

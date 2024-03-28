@@ -3,10 +3,11 @@
 #include "PaletteMaker.hpp"
 
 static int  _generatePalettes();
-static void _generateGrey();
 static void _generateBW();
-static void _generateGradientRgGbBr();
+static void _generateGrey();
 static void _generateGreyQaattuor();
+static void _generateGradientRgGbBr();
+static void _generateGradientRg();
 
 static uint32_t PALETTES[NUMBER_OF_PALETTES][NUMBER_OF_COLORS] = {};
 
@@ -14,16 +15,25 @@ static int _dummy = _generatePalettes();
 
 static uint currentPalette = DEFAULT_PALETTE;
 
+static void _generateBW()
+{
+    memset(PALETTES[PALETTE_BW], 0xff, sizeof(PALETTES[PALETTE_BW]));
+    PALETTES[PALETTE_BW][NUMBER_OF_COLORS - 1] = 0xff << ALPHA;
+}
+
 static void _generateGrey()
 {
     for (int i = 0; i < NUMBER_OF_COLORS; i++)
         PALETTES[PALETTE_GREY][i] = (0xff << ALPHA) + (i << RED) + (i << GREEN) + (i << BLUE);
 }
 
-static void _generateBW()
+static void _generateGreyQaattuor()
 {
-    memset(PALETTES[PALETTE_BW], 0xff, sizeof(PALETTES[PALETTE_BW]));
-    PALETTES[PALETTE_BW][0] = 0xff << ALPHA;
+    for (int i = 0; i < NUMBER_OF_COLORS; i++)
+    {
+        char c = (char)(sqrt(sqrt((double)i / NUMBER_OF_COLORS)) * (double)NUMBER_OF_COLORS); 
+        PALETTES[PALETTE_GREY_QUATTUOR][i] = (0xff << ALPHA) + (c << RED) + (c << GREEN) + (c << BLUE);
+    }
 }
 
 static void _generateGradientRgGbBr()
@@ -48,12 +58,13 @@ static void _generateGradientRgGbBr()
     }
 }
 
-static void _generateGreyQaattuor()
+static void _generateGradientRg()
 {
-    for (int i = 0; i < NUMBER_OF_COLORS; i++)
+    // (255, 0, 0) -> (0, 255, 0)
+    for (int n = 0; n < NUMBER_OF_COLORS; n++)
     {
-        char c = (char)(sqrt(sqrt((double)i / NUMBER_OF_COLORS)) * (double)NUMBER_OF_COLORS); 
-        PALETTES[PALETTE_GREY_QUATTUOR][i] = (0xff << ALPHA) + (c << RED) + (c << GREEN) + (c << BLUE);
+        int i = n;
+        PALETTES[PALETTE_GRADIENT_RG][n] = (0xff << ALPHA) + ((NUMBER_OF_COLORS - 1 - i) << RED) + (i << GREEN);
     }
 }
 
@@ -63,6 +74,7 @@ static int _generatePalettes()
     _generateGrey();
     _generateGreyQaattuor();
     _generateGradientRgGbBr();
+    _generateGradientRg();
 
     return 0;
 }
@@ -85,6 +97,6 @@ const uint32_t* GetNextPalette()
 
 const uint32_t* GetPreviousPalette()
 {
-    currentPalette = (currentPalette - 1) % NUMBER_OF_PALETTES;
+    currentPalette = currentPalette == 0 ? NUMBER_OF_PALETTES - 1 : (currentPalette - 1) % NUMBER_OF_PALETTES;
     return PALETTES[currentPalette];
 }

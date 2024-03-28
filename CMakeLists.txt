@@ -13,7 +13,7 @@ pkg_check_modules(SDL2 REQUIRED sdl2 SDL2_image)
 
 include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS})
 
-set(CMAKE_CXX_FLAGS_RELEASE "-march=tigerlake -mavx512f -O0")
+set(CMAKE_CXX_FLAGS_RELEASE "-march=tigerlake -mavx512f -O3")
 
 set (SOURCES 
     "Utils/Utils.cpp"

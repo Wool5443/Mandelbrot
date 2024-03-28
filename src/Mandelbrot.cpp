@@ -51,7 +51,7 @@ ErrorCode DrawMandelbrotNaive(SDL_Surface* surface, Camera* camera, const uint32
                 y = xy + xy + y0;
             }
 
-            *(pixels + iy * camera->w + ix) = palette[N % NUMBER_OF_COLORS];
+            *(pixels + iy * camera->w + ix) = palette[N - 1];
         }
     }
 
