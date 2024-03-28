@@ -14,36 +14,36 @@ static const __m512d DX_FACTORS = _mm512_set_pd (7.f,  6.f,  5.f,  4.f,  3.f,  2
 ErrorCode DrawMandelbrotNaive(SDL_Surface* surface, Camera* camera, const uint32_t* palette)
 {
     MyAssertSoft(surface, ERROR_NULLPTR);
-    MyAssertSoft(camera, ERROR_NULLPTR);
+    MyAssertSoft(camera,  ERROR_NULLPTR);
 
     SDL_LockSurface(surface);
 
     uint32_t* pixels = (uint32_t*)surface->pixels;
 
-    const float xShift = (double)camera->w / 2.f;
-    const float yShift = (double)camera->h / 2.f;
+    const double xShift = (double)camera->w / 2.f;
+    const double yShift = (double)camera->h / 2.f;
 
     for (int iy = 0; iy < camera->h; iy++)
     {
         for (int ix = 0; ix < camera->w; ix++)
         {
-            const float x0 = ((float)ix - xShift) / camera->scale - camera->x;
-            const float y0 = ((float)iy - yShift) / camera->scale - camera->y;
+            const double x0 = ((double)ix - xShift) / camera->scale - camera->x;
+            const double y0 = ((double)iy - yShift) / camera->scale - camera->y;
 
-            float x = x0, y = y0;
+            double x = x0, y = y0;
 
             int N = 0;
 
             for (; N < N_MAX; N++)
             {
-                const float x2 = x * x;
-                const float y2 = y * y;
-                const float r2 = x2 + y2;
+                const double x2 = x * x;
+                const double y2 = y * y;
+                const double r2 = x2 + y2;
 
                 if (r2 > R2_MAX)
                     break;
 
-                const float xy = x * y;
+                const double xy = x * y;
 
                 x = x2 - y2 + x0;
                 y = xy + xy + y0;
@@ -61,7 +61,7 @@ ErrorCode DrawMandelbrotNaive(SDL_Surface* surface, Camera* camera, const uint32
 ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera, const uint32_t* palette)
 {
     MyAssertSoft(surface, ERROR_NULLPTR);
-    MyAssertSoft(camera, ERROR_NULLPTR);
+    MyAssertSoft(camera,  ERROR_NULLPTR);
 
     SDL_LockSurface(surface);
 
