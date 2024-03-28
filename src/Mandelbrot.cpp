@@ -89,13 +89,12 @@ ErrorCode DrawMandelbrotArrays(SDL_Surface* surface, Camera* camera, const uint3
             const double  x0 = ((double)ix - xShift) / camera->scale - camera->x;
 
             double X0[SIMULTANEOUS_PIXELS] = {};
-            for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) X0[i] = x0;
+            for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) X0[i] = x0 + DX[i];
 
             double X[SIMULTANEOUS_PIXELS], Y[SIMULTANEOUS_PIXELS];
             for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) X[i] = X0[i];
             for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) Y[i] = Y0[i];
 
-            char     finished[SIMULTANEOUS_PIXELS] = {};
             uint32_t colors  [SIMULTANEOUS_PIXELS];
             for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) colors[i] = palette[0];
 
@@ -108,29 +107,29 @@ ErrorCode DrawMandelbrotArrays(SDL_Surface* surface, Camera* camera, const uint3
                 double XY[SIMULTANEOUS_PIXELS];
                 for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) XY[i] = X[i] * Y[i];
 
-                char cmp[SIMULTANEOUS_PIXELS] = {};
+                uint8_t cmp[SIMULTANEOUS_PIXELS] = {};
                 for (int i = 0; i < SIMULTANEOUS_PIXELS; i++)
-                    if (!finished[i] && X2[i] + Y2[i] < R2_MAX)
+                    if (X2[i] + Y2[i] < R2_MAX)
                         cmp[i] = 1;
 
-                if (*(uint64_t*)finished) // since cmp is 8 bytes
+                if (!*(uint64_t*)cmp) // since cmp is 8 bytes
                     break;
 
                 for (int i = 0; i < SIMULTANEOUS_PIXELS; i++)
-                    if (!finished[i] && !cmp[i])
+                    if (cmp[i])
                         colors[i] = palette[n];
                 
                 for (int i = 0; i < SIMULTANEOUS_PIXELS; i++)
                     X[i] = X2[i] - Y2[i] + X0[i];
                 for (int i = 0; i < SIMULTANEOUS_PIXELS; i++)
-                    Y[i] = XY[i] + Y0[i];
+                    Y[i] = 2 * XY[i] + Y0[i];
             }
 
             for (int i = 0; i < SIMULTANEOUS_PIXELS; i++)
                 pixelsRow[i] = colors[i];
             pixelsRow += SIMULTANEOUS_PIXELS;
         }
-        pixelsRow += camera->w;
+        pixels += camera->w;
     }
 
     SDL_UnlockSurface(surface);
@@ -167,7 +166,7 @@ ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera, const uint3
 
             __m512d X = X0, Y = Y0;
 
-            __m512i  colors        = _mm512_set1_epi32(palette[0]);
+            __m512i  colors        = _mm512_set1_epi32(palette[NUMBER_OF_COLORS - 1]);
             __mmask8 notYetInfinte = 0xFF;
 
             for (int n = 0; n < N_MAX; n++)

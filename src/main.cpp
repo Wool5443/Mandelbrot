@@ -103,7 +103,9 @@ int main()
         printf("Naive:  %d runs took %llu ticks\n", RUN_TIMES, ticksNaive);
         printf("Arrays: %d runs took %llu ticks\n", RUN_TIMES, ticksArrays);
         printf("AVX:    %d runs took %llu ticks\n", RUN_TIMES, ticksAVX);
-        printf("Naive / AVX = %.4lg\n", (double)ticksNaive / (double)ticksAVX);
+        printf("Naive  / Arrays = %.4lg\n", (double)ticksNaive  / (double)ticksArrays);
+        printf("Naive  / AVX    = %.4lg\n", (double)ticksNaive  / (double)ticksAVX);
+        printf("Arrays / AVX    = %.4lg\n", (double)ticksArrays / (double)ticksAVX);
     }
 
     SDL_DestroyWindow(window);
