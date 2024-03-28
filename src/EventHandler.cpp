@@ -1,8 +1,9 @@
 #include "EventHandler.hpp"
 #include "PaletteMaker.hpp"
 
+static Drawer _currentDrawer = DEFAULT_DRAWER;
 
-void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running, bool* runBench, DrawFunction_t* currentDrawer,
+void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running, bool* runBench, DrawFunction_t* drawer,
                     const uint32_t** palette)
 {
     MyAssertHard(e,       ERROR_NULLPTR);
@@ -19,10 +20,8 @@ void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running, bool* runBench
             *runBench = true;
             break;
         case SDLK_r:
-            if (*currentDrawer == DrawMandelbrotAVX512)
-                *currentDrawer = DrawMandelbrotNaive;
-            else
-                *currentDrawer = DrawMandelbrotAVX512;
+            _currentDrawer = (Drawer)((_currentDrawer + 1) % NUMBER_OF_DRAWERS);
+            *drawer = DRAWERS[_currentDrawer];
             break;
         case SDLK_e:
             *palette = GetNextPalette();
@@ -63,17 +62,15 @@ void KeyboardHandler(SDL_Event* e, Camera* camera, bool* running, bool* runBench
     }
 }
 
-void MouseButtonHandler(SDL_Event* e, Camera* camera, DrawFunction_t* currentDrawer)
+void MouseButtonHandler(SDL_Event* e, Camera* camera, DrawFunction_t* drawer)
 {
     MyAssertHard(e,      ERROR_NULLPTR);
     MyAssertHard(camera, ERROR_NULLPTR);
 
     if (e->button.button == SDL_BUTTON_MIDDLE)
     {
-       if (*currentDrawer == DrawMandelbrotAVX512)
-            *currentDrawer = DrawMandelbrotNaive;
-        else
-            *currentDrawer = DrawMandelbrotAVX512; 
+        _currentDrawer = (Drawer)((_currentDrawer + 1) % NUMBER_OF_DRAWERS);
+        *drawer = DRAWERS[_currentDrawer];
         return;
     }
 

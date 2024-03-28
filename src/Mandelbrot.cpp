@@ -8,6 +8,8 @@ static const uint32_t COLOR_INCREMENT     = 0x00110a09;
 static const int    N_MAX  = 256;
 static const double R2_MAX = 10.f * 10.f;
 
+static const double DX_FACTORS_ARRAY[SIMULTANEOUS_PIXELS] = { 0.f,  1.f,  2.f,  3.f,  4.f,  5.f,  6.f, 7.f };
+
 static const __m512d R2_MAX_512 = _mm512_set1_pd(R2_MAX);
 static const __m512d DX_FACTORS = _mm512_set_pd (7.f,  6.f,  5.f,  4.f,  3.f,  2.f,  1.f, 0.f);
 
@@ -58,6 +60,84 @@ ErrorCode DrawMandelbrotNaive(SDL_Surface* surface, Camera* camera, const uint32
     return EVERYTHING_FINE;
 }
 
+ErrorCode DrawMandelbrotArrays(SDL_Surface* surface, Camera* camera, const uint32_t* palette)
+{
+    MyAssertSoft(surface, ERROR_NULLPTR);
+    MyAssertSoft(camera,  ERROR_NULLPTR);
+
+    SDL_LockSurface(surface);
+
+    uint32_t* pixels = (uint32_t*)surface->pixels;
+
+    const double xShift = (double)camera->w / 2.f;
+    const double yShift = (double)camera->h / 2.f;
+
+    const double revScale = 1 / camera->scale;
+    double DX[SIMULTANEOUS_PIXELS] = {};
+    for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) DX[i] = revScale * DX_FACTORS_ARRAY[i];
+
+    for (int iy = 0; iy < camera->h; iy++)
+    {
+        uint32_t* pixelsRow = pixels;
+
+        const double  y0 = ((double)iy - yShift) / camera->scale - camera->y;
+        double Y0[SIMULTANEOUS_PIXELS] = {};
+        for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) Y0[i] = y0;
+
+        for (int ix = 0; ix < camera->w; ix += SIMULTANEOUS_PIXELS)
+        {
+            const double  x0 = ((double)ix - xShift) / camera->scale - camera->x;
+
+            double X0[SIMULTANEOUS_PIXELS] = {};
+            for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) X0[i] = x0;
+
+            double X[SIMULTANEOUS_PIXELS], Y[SIMULTANEOUS_PIXELS];
+            for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) X[i] = X0[i];
+            for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) Y[i] = Y0[i];
+
+            char     finished[SIMULTANEOUS_PIXELS] = {};
+            uint32_t colors  [SIMULTANEOUS_PIXELS];
+            for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) colors[i] = palette[0];
+
+            for (int n = 0; n < N_MAX; n++)
+            {
+                double X2[SIMULTANEOUS_PIXELS];
+                for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) X2[i] = X[i] * X[i];
+                double Y2[SIMULTANEOUS_PIXELS];
+                for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) Y2[i] = Y[i] * Y[i];
+                double XY[SIMULTANEOUS_PIXELS];
+                for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) XY[i] = X[i] * Y[i];
+
+                char cmp[SIMULTANEOUS_PIXELS] = {};
+                for (int i = 0; i < SIMULTANEOUS_PIXELS; i++)
+                    if (!finished[i] && X2[i] + Y2[i] < R2_MAX)
+                        cmp[i] = 1;
+
+                if (*(uint64_t*)finished) // since cmp is 8 bytes
+                    break;
+
+                for (int i = 0; i < SIMULTANEOUS_PIXELS; i++)
+                    if (!finished[i] && !cmp[i])
+                        colors[i] = palette[n];
+                
+                for (int i = 0; i < SIMULTANEOUS_PIXELS; i++)
+                    X[i] = X2[i] - Y2[i] + X0[i];
+                for (int i = 0; i < SIMULTANEOUS_PIXELS; i++)
+                    Y[i] = XY[i] + Y0[i];
+            }
+
+            for (int i = 0; i < SIMULTANEOUS_PIXELS; i++)
+                pixelsRow[i] = colors[i];
+            pixelsRow += SIMULTANEOUS_PIXELS;
+        }
+        pixelsRow += camera->w;
+    }
+
+    SDL_UnlockSurface(surface);
+
+    return EVERYTHING_FINE;
+}
+
 ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera, const uint32_t* palette)
 {
     MyAssertSoft(surface, ERROR_NULLPTR);
@@ -75,7 +155,6 @@ ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera, const uint3
     for (int iy = 0; iy < camera->h; iy++)
     {
         uint32_t* pixelsRow = pixels;
-        pixels += camera->w;
 
         const double  y0 = ((double)iy - yShift) / camera->scale - camera->y;
         const __m512d Y0 = _mm512_set1_pd(y0);
@@ -112,6 +191,8 @@ ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera, const uint3
             _mm512_storeu_epi32(pixelsRow, colors);
             pixelsRow += SIMULTANEOUS_PIXELS;
         }
+
+        pixels += camera->w;
     }
 
     SDL_UnlockSurface(surface);

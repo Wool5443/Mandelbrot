@@ -20,8 +20,6 @@ struct Camera
     double scale;
 };
 
-typedef ErrorCode (*DrawFunction_t)(SDL_Surface*, Camera*, const uint32_t*);
-
 /*
 * @brief Draws one frame of Mandelbrot using trivial approach
 * @param [in] surface - sdl surface of main window
@@ -31,6 +29,16 @@ typedef ErrorCode (*DrawFunction_t)(SDL_Surface*, Camera*, const uint32_t*);
 */
 ErrorCode DrawMandelbrotNaive(SDL_Surface* surface, Camera* camera, const uint32_t* palette);
 
+
+/*
+* @brief Draws one frame of Mandelbrot using arrays approach
+* @param [in] surface - sdl surface of main window
+* @param [in] camera  - camera info
+*
+* @return error
+*/
+ErrorCode DrawMandelbrotArrays(SDL_Surface* surface, Camera* camera, const uint32_t* palette);
+
 /*
 * @brief Draws one frame of Mandelbrot using trivial approach
 * @param [in] surface - sdl surface of main window
@@ -39,3 +47,16 @@ ErrorCode DrawMandelbrotNaive(SDL_Surface* surface, Camera* camera, const uint32
 * @return error
 */
 ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera, const uint32_t* palette);
+
+typedef ErrorCode (*DrawFunction_t)(SDL_Surface*, Camera*, const uint32_t*);
+
+enum Drawer
+{
+    NAIVE,
+    ARRAYS,
+    AVX512,
+};
+
+static const int NUMBER_OF_DRAWERS = 3;
+static const Drawer         DEFAULT_DRAWER = AVX512;
+static const DrawFunction_t DRAWERS[] = { DrawMandelbrotNaive, DrawMandelbrotArrays, DrawMandelbrotAVX512 };

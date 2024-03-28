@@ -28,7 +28,7 @@ B - выход с запуском бенчмарка.
 ## Тесты производительности
 Использовалось 2 реализации:
 
-* Наивная
+### Наивная
 
 Здесь мы просто расчитываем каждый пиксель по формуле
 множества Мандельброта.
@@ -68,7 +68,74 @@ for (int iy = 0; iy < camera->h; iy++)
 }
 ```
 
-* AVX512
+### Arrays
+```c++
+const double xShift = (double)camera->w / 2.f;
+const double yShift = (double)camera->h / 2.f;
+
+const double revScale = 1 / camera->scale;
+double DX[SIMULTANEOUS_PIXELS] = {};
+for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) DX[i] = revScale * DX_FACTORS_ARRAY[i];
+
+for (int iy = 0; iy < camera->h; iy++)
+{
+    uint32_t* pixelsRow = pixels;
+
+    const double  y0 = ((double)iy - yShift) / camera->scale - camera->y;
+    double Y0[SIMULTANEOUS_PIXELS] = {};
+    for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) Y0[i] = y0;
+
+    for (int ix = 0; ix < camera->w; ix += SIMULTANEOUS_PIXELS)
+    {
+        const double  x0 = ((double)ix - xShift) / camera->scale - camera->x;
+
+        double X0[SIMULTANEOUS_PIXELS] = {};
+        for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) X0[i] = x0;
+
+        double X[SIMULTANEOUS_PIXELS], Y[SIMULTANEOUS_PIXELS];
+        for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) X[i] = X0[i];
+        for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) Y[i] = Y0[i];
+
+        char     finished[SIMULTANEOUS_PIXELS] = {};
+        uint32_t colors  [SIMULTANEOUS_PIXELS];
+        for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) colors[i] = palette[0];
+
+        for (int n = 0; n < N_MAX; n++)
+        {
+            double X2[SIMULTANEOUS_PIXELS];
+            for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) X2[i] = X[i] * X[i];
+            double Y2[SIMULTANEOUS_PIXELS];
+            for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) Y2[i] = Y[i] * Y[i];
+            double XY[SIMULTANEOUS_PIXELS];
+            for (int i = 0; i < SIMULTANEOUS_PIXELS; i++) XY[i] = X[i] * Y[i];
+
+            char cmp[SIMULTANEOUS_PIXELS] = {};
+            for (int i = 0; i < SIMULTANEOUS_PIXELS; i++)
+                if (!finished[i] && X2[i] + Y2[i] < R2_MAX)
+                    cmp[i] = 1;
+
+            if (*(uint64_t*)finished) // since cmp is 8 bytes
+                break;
+
+            for (int i = 0; i < SIMULTANEOUS_PIXELS; i++)
+                if (!finished[i] && !cmp[i])
+                    colors[i] = palette[n];
+            
+            for (int i = 0; i < SIMULTANEOUS_PIXELS; i++)
+                X[i] = X2[i] - Y2[i] + X0[i];
+            for (int i = 0; i < SIMULTANEOUS_PIXELS; i++)
+                Y[i] = XY[i] + Y0[i];
+        }
+
+        for (int i = 0; i < SIMULTANEOUS_PIXELS; i++)
+            pixelsRow[i] = colors[i];
+        pixelsRow += SIMULTANEOUS_PIXELS;
+    }
+    pixelsRow += camera->w;
+}
+```
+
+### AVX512
 
 Здесь используются AVX512 инструкции, позволяющие одновременно обрабатывать сразу по 8 пикселей
 в double.
@@ -127,8 +194,9 @@ for (int iy = 0; iy < camera->h; iy++)
 
 Реализация | Количество прогонов | Количество Тиков | Отношение
 |:--------:|:-----------------:|:----------------:|:---------:|
-Naive      |100                |63079209161       |1          |
-AVX512     |100                |18761512831       |3.362      |
+Naive   -O0|100                |63079209161       |1          |
+Arrays  -O0|100                |63079209161       |1          |
+AVX512  -O0|100                |18761512831       |3.362      |
 
 AVX  : 100 runs took 18761512831 ticks
 

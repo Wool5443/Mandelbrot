@@ -24,13 +24,13 @@ int main()
     bool mouseDown = false;
     bool runBench  = false;
 
+    DrawFunction_t currentDrawer = DRAWERS[DEFAULT_DRAWER];
+    const uint32_t* palette = GetPalette(DEFAULT_PALETTE);
+
     SDL_Surface* surface = SDL_GetWindowSurface(window);
     SDL_Surface* digits  = IMG_Load(DIGITS_PATH);
     RETURN_ERROR(!surface, SDL_GetError());
     RETURN_ERROR(!digits, SDL_GetError());
-
-    DrawFunction_t currentDrawer = DrawMandelbrotAVX512;
-    const uint32_t* palette = GetPalette(DEFAULT_PALETTE);
 
     Camera camera = 
     {
@@ -96,11 +96,13 @@ int main()
 
     if (runBench)
     {
-        uint64_t ticksNaive = RunBenchmark(DrawMandelbrotNaive, surface, &camera, (uint32_t*)palette);
-        uint64_t ticksAVX   = RunBenchmark(DrawMandelbrotAVX512, surface, &camera, (uint32_t*)palette);
+        uint64_t ticksNaive  = RunBenchmark(DrawMandelbrotNaive, surface, &camera, (uint32_t*)palette);
+        uint64_t ticksArrays = RunBenchmark(DrawMandelbrotArrays, surface, &camera, (uint32_t*)palette);
+        uint64_t ticksAVX    = RunBenchmark(DrawMandelbrotAVX512, surface, &camera, (uint32_t*)palette);
 
-        printf("Naive: %d runs took %llu ticks\n", RUN_TIMES, ticksNaive);
-        printf("AVX  : %d runs took %llu ticks\n", RUN_TIMES, ticksAVX);
+        printf("Naive:  %d runs took %llu ticks\n", RUN_TIMES, ticksNaive);
+        printf("Arrays: %d runs took %llu ticks\n", RUN_TIMES, ticksArrays);
+        printf("AVX:    %d runs took %llu ticks\n", RUN_TIMES, ticksAVX);
         printf("Naive / AVX = %.4lg\n", (double)ticksNaive / (double)ticksAVX);
     }
 
