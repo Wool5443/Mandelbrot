@@ -12,8 +12,8 @@ static const double REVERSE_WHEEL_FACT = 1 / WHEEL_FACT;
 
 struct Camera
 {
-    int   w;
-    int   h;
+    int    w;
+    int    h;
 
     double x;
     double y;

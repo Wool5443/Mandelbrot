@@ -22,8 +22,8 @@ ErrorCode DrawMandelbrotNaive(SDL_Surface* surface, Camera* camera, const uint32
 
     uint32_t* pixels = (uint32_t*)surface->pixels;
 
-    const double xShift = (double)camera->w / 2.f;
-    const double yShift = (double)camera->h / 2.f;
+    const double xShift = (double)camera->w / 2.;
+    const double yShift = (double)camera->h / 2.;
 
     for (int iy = 0; iy < camera->h; iy++)
     {
