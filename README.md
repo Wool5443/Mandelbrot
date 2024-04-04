@@ -12,6 +12,8 @@
 ![alt text](img/BW.png)
 ### RGB Градиент
 ![alt text](img/Gradient.png)
+### RG Градиент
+![alt text](img/GradientRG.png)
 
 ## Управление
 Стрелочки/WASD - перемещение

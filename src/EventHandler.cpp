@@ -93,14 +93,14 @@ void MouseWheelHandler(SDL_Event* e, Camera* camera)
     else
         zoomValue = REVERSE_WHEEL_FACT;
 
-    double xShift = (double)camera->w / 2.f;
-    double yShift = (double)camera->h / 2.f;
+    double xShift = (double)camera->w / 2.;
+    double yShift = (double)camera->h / 2.;
 
     int mouseX = e->wheel.mouseX - xShift;
     int mouseY = e->wheel.mouseY - yShift;
 
-    camera->x += (1 / zoomValue - 1.f) * mouseX / camera->scale;
-    camera->y += (1 / zoomValue - 1.f) * mouseY / camera->scale;
+    camera->x += (1 / zoomValue - 1.) * mouseX / camera->scale;
+    camera->y += (1 / zoomValue - 1.) * mouseY / camera->scale;
 
     camera->scale *= zoomValue;
 }

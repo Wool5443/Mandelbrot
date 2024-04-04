@@ -5,7 +5,7 @@
 static int  _generatePalettes();
 static void _generateBW();
 static void _generateGrey();
-static void _generateGreyQaattuor();
+static void _generateGreyQuattuor();
 static void _generateGradientRgGbBr();
 static void _generateGradientRg();
 
@@ -27,7 +27,7 @@ static void _generateGrey()
         PALETTES[PALETTE_GREY][i] = (0xff << ALPHA) + (i << RED) + (i << GREEN) + (i << BLUE);
 }
 
-static void _generateGreyQaattuor()
+static void _generateGreyQuattuor()
 {
     for (int i = 0; i < NUMBER_OF_COLORS; i++)
     {
@@ -72,7 +72,7 @@ static int _generatePalettes()
 {
     _generateBW();
     _generateGrey();
-    _generateGreyQaattuor();
+    _generateGreyQuattuor();
     _generateGradientRgGbBr();
     _generateGradientRg();
 
