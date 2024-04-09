@@ -15,10 +15,3 @@ static const int RUN_TIMES      = 100;
 uint64_t RunBenchmark(DrawFunction_t drawFunction, SDL_Surface* surface, Camera* camera, uint32_t* palette);
 
 void ShowFps(SDL_Surface* surface, SDL_Surface* digits, int fps);
-
-static inline __attribute__((always_inline)) uint64_t GetCPUTicks()
-{
-    uint64_t lo, hi;
-    asm("rdtsc" : "=a" (lo), "=d" (hi));
-    return (hi << 32) + lo;
-}
