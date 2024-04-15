@@ -43,7 +43,6 @@ int main()
 
     timespec start = {};
     timespec end   = {};
-
     while (running)
     {
         while (SDL_PollEvent(&e))

@@ -2,6 +2,14 @@
 #include "Mandelbrot.hpp"
 #include "PaletteMaker.hpp"
 
+#if SDL_MUSTLOCK == true
+#define LOCK_SURFACE(surface) SDL_LockSurface(surface)
+#define UNLOCK_SURFACE(surface) SDL_UnlockSurface(surface)
+#else
+#define LOCK_SURFACE(...)
+#define UNLOCK_SURFACE(surface)
+#endif
+
 static const int      SIMULTANEOUS_PIXELS = 8;
 static const uint32_t COLOR_INCREMENT     = 0x00110a09;
 
@@ -65,7 +73,7 @@ ErrorCode DrawMandelbrotArrays(SDL_Surface* surface, Camera* camera, const uint3
     MyAssertSoft(surface, ERROR_NULLPTR);
     MyAssertSoft(camera,  ERROR_NULLPTR);
 
-    SDL_LockSurface(surface);
+    LOCK_SURFACE(surface);
 
     uint32_t* pixels = (uint32_t*)surface->pixels;
 
@@ -132,7 +140,7 @@ ErrorCode DrawMandelbrotArrays(SDL_Surface* surface, Camera* camera, const uint3
         pixels += camera->w;
     }
 
-    SDL_UnlockSurface(surface);
+    UNLOCK_SURFACE(surface);
 
     return EVERYTHING_FINE;
 }
@@ -142,7 +150,7 @@ ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera, const uint3
     MyAssertSoft(surface, ERROR_NULLPTR);
     MyAssertSoft(camera,  ERROR_NULLPTR);
 
-    SDL_LockSurface(surface);
+    LOCK_SURFACE(surface);
 
     uint32_t* pixels = (uint32_t*)surface->pixels;
 
@@ -194,7 +202,7 @@ ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera, const uint3
         pixels += camera->w;
     }
 
-    SDL_UnlockSurface(surface);
+    UNLOCK_SURFACE(surface);
 
     return EVERYTHING_FINE;
 }
