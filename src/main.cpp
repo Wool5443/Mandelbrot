@@ -109,6 +109,7 @@ int main()
 
     SDL_DestroyWindow(window);
     SDL_Quit();
+    IMG_Quit();
 
     return 0;
 }
