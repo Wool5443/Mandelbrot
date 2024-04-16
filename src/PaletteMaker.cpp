@@ -13,7 +13,7 @@ static uint32_t PALETTES[NUMBER_OF_PALETTES][NUMBER_OF_COLORS] = {};
 
 static int _dummy = _generatePalettes();
 
-static uint currentPalette = DEFAULT_PALETTE;
+static uint32_t currentPalette = DEFAULT_PALETTE;
 
 static void _generateBW()
 {
