@@ -10,14 +10,17 @@
 
 static const int ALLIGN_WINDOW_16 = ~0x7;
 
-int main()
+int main(const int argc, char* argv[])
 {
-    SDL_Init(SDL_INIT_EVERYTHING);
+    if (!SDL_Init(SDL_INIT_EVERYTHING))
+    {
+        fprintf(stderr, "%s\n", fprintf(stderr, "%s\n", SDL_GetError()));
+    }
     IMG_Init(IMG_INIT_PNG);
 
     SDL_Window* window = SDL_CreateWindow(WINDOW_TITLE, -1, -1, WINDOW_WIDTH, WINDOW_HEIGHT,
                                           SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-    RETURN_ERROR(!window, SDL_GetError());
+    RETURN_ERROR(!window, fprintf(stderr, "%s\n", SDL_GetError()));
 
     SDL_Event e = {};
     bool running   = true;
@@ -29,8 +32,8 @@ int main()
 
     SDL_Surface* surface = SDL_GetWindowSurface(window);
     SDL_Surface* digits  = IMG_Load(DIGITS_PATH);
-    RETURN_ERROR(!surface, SDL_GetError());
-    RETURN_ERROR(!digits, SDL_GetError());
+    RETURN_ERROR(!surface, fprintf(stderr, "%s\n", SDL_GetError()));
+    RETURN_ERROR(!digits, fprintf(stderr, "%s\n", SDL_GetError()));
 
     Camera camera = 
     {
@@ -109,6 +112,7 @@ int main()
 
     SDL_DestroyWindow(window);
     SDL_Quit();
+    IMG_Quit();
 
     return 0;
 }

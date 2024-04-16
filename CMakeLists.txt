@@ -6,14 +6,12 @@ project(${projectName} CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 
-find_package(SDL2 REQUIRED)
-find_package(SDL2_image REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SDL2 REQUIRED sdl2 SDL2_image)
 
 include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS})
 
-set(CMAKE_CXX_FLAGS_RELEASE "-march=tigerlake -mavx512f -O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-march=native -mavx512f -O3")
 
 set (SOURCES 
     "Utils/Utils.cpp"
