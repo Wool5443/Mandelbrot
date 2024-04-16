@@ -12,13 +12,13 @@ static const int ALLIGN_WINDOW_16 = ~0x7;
 
 int main(const int argc, char* argv[])
 {
-    if (!SDL_Init(SDL_INIT_EVERYTHING))
+    if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
         fprintf(stderr, "%s\n", fprintf(stderr, "%s\n", SDL_GetError()));
     }
     IMG_Init(IMG_INIT_PNG);
 
-    SDL_Window* window = SDL_CreateWindow(WINDOW_TITLE, -1, -1, WINDOW_WIDTH, WINDOW_HEIGHT,
+    SDL_Window* window = SDL_CreateWindow(WINDOW_TITLE, 100, 100, WINDOW_WIDTH, WINDOW_HEIGHT,
                                           SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     RETURN_ERROR(!window, fprintf(stderr, "%s\n", SDL_GetError()));
 
