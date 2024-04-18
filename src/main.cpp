@@ -95,16 +95,21 @@ int main()
 
     if (runBench)
     {
-        uint64_t ticksNaive  = RunBenchmark(DrawMandelbrotNaive, surface, &camera, (uint32_t*)palette);
-        uint64_t ticksArrays = RunBenchmark(DrawMandelbrotArrays, surface, &camera, (uint32_t*)palette);
-        uint64_t ticksAVX    = RunBenchmark(DrawMandelbrotAVX512, surface, &camera, (uint32_t*)palette);
+        const char* resultsPath = "resultsO3.csv";
+        FILE*       resFile     = fopen(resultsPath, "wb");
+        if (!resFile) return ERROR_BAD_FILE;
 
-        printf("Naive:  %d runs took %llu ticks\n", RUN_TIMES, ticksNaive);
-        printf("Arrays: %d runs took %llu ticks\n", RUN_TIMES, ticksArrays);
-        printf("AVX:    %d runs took %llu ticks\n", RUN_TIMES, ticksAVX);
-        printf("Naive  / Arrays = %.4lg\n", (double)ticksNaive  / (double)ticksArrays);
-        printf("Naive  / AVX    = %.4lg\n", (double)ticksNaive  / (double)ticksAVX);
-        printf("Arrays / AVX    = %.4lg\n", (double)ticksArrays / (double)ticksAVX);
+        fprintf(resFile, "Naive\tArrays\tAVX\n");
+
+        for (int i = 0; i < 5; i++)
+        {
+            uint64_t ticksNaive  = RunBenchmark(DrawMandelbrotNaive, surface, &camera, (uint32_t*)palette);
+            uint64_t ticksArrays = RunBenchmark(DrawMandelbrotArrays, surface, &camera, (uint32_t*)palette);
+            uint64_t ticksAVX    = RunBenchmark(DrawMandelbrotAVX512, surface, &camera, (uint32_t*)palette);
+            fprintf(resFile, "%llu\t%llu\t%llu\t\n", ticksNaive, ticksArrays, ticksAVX);
+        }
+
+        fclose(resFile);
     }
 
     SDL_DestroyWindow(window);
