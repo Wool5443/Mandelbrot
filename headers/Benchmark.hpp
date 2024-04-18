@@ -3,7 +3,7 @@
 #include <SDL2/SDL.h>
 #include "Mandelbrot.hpp"
 
-static const char* DIGITS_PATH = "res/numbers2.png";
+static const char* DIGITS_PATH = "../res/numbers2.png";
 
 static const int   DIGIT_WIDTH  = 14;
 static const int   DIGIT_HEIGHT = 20;
