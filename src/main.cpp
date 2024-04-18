@@ -70,7 +70,6 @@ int main()
                     {
                         camera.w = e.window.data1 & ALLIGN_WINDOW_16;
                         camera.h = e.window.data2;
-                        printf("w = %d h = %d\n", camera.w, camera.h);
 
                         SDL_SetWindowSize(window, camera.w, camera.h);
                         surface = SDL_GetWindowSurface(window);
@@ -95,7 +94,7 @@ int main()
 
     if (runBench)
     {
-        const char* resultsPath = "resultsO3.csv";
+        const char* resultsPath = "../Tables/resultsO3.csv";
         FILE*       resFile     = fopen(resultsPath, "wb");
         if (!resFile) return ERROR_BAD_FILE;
 
