@@ -17,7 +17,7 @@ int main()
 
     SDL_Window* window = SDL_CreateWindow(WINDOW_TITLE, -1, -1, WINDOW_WIDTH, WINDOW_HEIGHT,
                                           SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-    RETURN_ERROR(!window, fprintf(stderr, "%s\n"m SDL_GetError()));
+    RETURN_ERROR(!window, fprintf(stderr, "%s\n", SDL_GetError()));
 
     SDL_Event e = {};
     bool running   = true;
@@ -29,8 +29,8 @@ int main()
 
     SDL_Surface* surface = SDL_GetWindowSurface(window);
     SDL_Surface* digits  = IMG_Load(DIGITS_PATH);
-    RETURN_ERROR(!surface, fprintf(stderr, "%s\n"m SDL_GetError()));
-    RETURN_ERROR(!digits, fprintf(stderr, "%s\n"m SDL_GetError()));
+    RETURN_ERROR(!surface, fprintf(stderr, "%s\n", SDL_GetError()));
+    RETURN_ERROR(!digits, fprintf(stderr, "%s\n", SDL_GetError()));
 
     Camera camera = 
     {
