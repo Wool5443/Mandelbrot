@@ -1,19 +1,12 @@
 from csv import reader
 
-def value_to_str(val: float, d_val: float) -> str:
-    val_str   = f"{val  :.2E}".replace("E+", "*10^{") + "}"
-    d_val_str = f"{d_val:.2E}".replace("E+", "*10^{") + "}"
+def value_to_str(val: float, eps_val: float) -> str:
+    val_str   = f"{val:.2E}".replace("E+", "*10^{") + "}"
 
     val_num = float(val_str[:3])
     val_exp = float(val_str[-3:-1])
 
-    d_val_num = float(d_val_str[:3])
-    d_val_exp = float(d_val_str[-3:-1])
-
-    d_val_num /= 10 ** (val_exp - d_val_exp)
-    d_val_exp  = val_exp
-
-    return f"{val_num:.4f} * 10^{{{val_exp:.0f}}} \pm {d_val_num:.4f} * 10^{{{d_val_exp:.0f}}}"
+    return f"{val_num:.2f} * 10^{{{val_exp:.0f}}} \pm {eps_val:.2f}%"
 
 
 def main():
@@ -24,15 +17,15 @@ def main():
     
     n = len(csv_read)
     
-    naive    = [0] * n
-    arrays   = [0] * n
-    AVX      = [0] * n
-    d_naive  = [0] * n
-    d_arrays = [0] * n
-    d_AVX    = [0] * n
+    naive      = [0] * n
+    arrays     = [0] * n
+    AVX        = [0] * n
+    eps_naive  = [0] * n
+    eps_arrays = [0] * n
+    eps_AVX    = [0] * n
 
     for i, row in enumerate(csv_read):
-        naive[i], d_naive[i], arrays[i], d_arrays[i], AVX[i], d_AVX[i] = map(float, row[1:])
+        naive[i], eps_naive[i], arrays[i], eps_arrays[i], AVX[i], eps_AVX[i] = map(float, row[1:])
 
     ALIGN = "\t"
 
@@ -44,8 +37,8 @@ def main():
             print(f"O Level{ALIGN * 2}|Naive{ALIGN * 9}|Arrays{ALIGN * 9}|AVX", file=f)
             print("------------|---------------------------------------|---------------------------------------|-------------------------------", file=f)
             for i in range(n):
-                print(f"{i}{ALIGN * 3}|${value_to_str(naive[i], d_naive[i])}${ALIGN * 2}|", end="", file=f)
-                print(f"${value_to_str(arrays[i], d_arrays[i])}${ALIGN * 2}|", end="", file=f)
-                print(f"${value_to_str(AVX[i], d_AVX[i])}$", file=f)
+                print(f"{i}{ALIGN * 3}|${value_to_str(naive[i], eps_naive[i])}${ALIGN * 2}|", end="", file=f)
+                print(f"${value_to_str(arrays[i], eps_arrays[i])}${ALIGN * 2}|", end="", file=f)
+                print(f"${value_to_str(AVX[i], eps_AVX[i])}$", file=f)
 
 main()
