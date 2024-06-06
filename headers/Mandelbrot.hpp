@@ -39,7 +39,7 @@ ErrorCode DrawMandelbrotNaive(SDL_Surface* surface, Camera* camera, const uint32
 */
 ErrorCode DrawMandelbrotArrays(SDL_Surface* surface, Camera* camera, const uint32_t* palette);
 
-#ifdef AVX512
+#ifdef __AVX512__
 /*
 * @brief Draws one frame of Mandelbrot using trivial approach
 * @param [in] surface - sdl surface of main window
@@ -51,17 +51,16 @@ ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera, const uint3
 #endif
 
 typedef ErrorCode (*DrawFunction_t)(SDL_Surface*, Camera*, const uint32_t*);
-
 enum Drawer
 {
     NAIVE,
     ARRAYS,
-#ifdef AVX512
+#ifdef __AVX512__
     AVX512,
 #endif
 };
 
-#ifdef AVX512
+#ifdef __AVX512__
 static const int NUMBER_OF_DRAWERS = 3;
 static const Drawer         DEFAULT_DRAWER = AVX512;
 #else 
@@ -69,7 +68,7 @@ static const int NUMBER_OF_DRAWERS = 2;
 static const Drawer         DEFAULT_DRAWER = ARRAYS;
 #endif
 static const DrawFunction_t DRAWERS[] = { DrawMandelbrotNaive, DrawMandelbrotArrays, 
-#ifdef AVX512
+#ifdef __AVX512__
 DrawMandelbrotAVX512
 #endif 
 };
