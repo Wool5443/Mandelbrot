@@ -18,8 +18,10 @@ static const double R2_MAX = 10.f * 10.f;
 
 static const double DX_FACTORS_ARRAY[SIMULTANEOUS_PIXELS] = { 0.f,  1.f,  2.f,  3.f,  4.f,  5.f,  6.f, 7.f };
 
+#ifdef AVX512
 static const __m512d R2_MAX_512 = _mm512_set1_pd(R2_MAX);
 static const __m512d DX_FACTORS = _mm512_set_pd (7.f,  6.f,  5.f,  4.f,  3.f,  2.f,  1.f, 0.f);
+#endif
 
 ErrorCode DrawMandelbrotNaive(SDL_Surface* surface, Camera* camera, const uint32_t* palette)
 {
@@ -145,6 +147,7 @@ ErrorCode DrawMandelbrotArrays(SDL_Surface* surface, Camera* camera, const uint3
     return EVERYTHING_FINE;
 }
 
+#ifdef AVX512
 ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera, const uint32_t* palette)
 {
     MyAssertSoft(surface, ERROR_NULLPTR);
@@ -206,3 +209,4 @@ ErrorCode DrawMandelbrotAVX512(SDL_Surface* surface, Camera* camera, const uint3
 
     return EVERYTHING_FINE;
 }
+#endif

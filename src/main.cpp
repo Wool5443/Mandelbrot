@@ -10,12 +10,12 @@
 
 static const int ALLIGN_WINDOW_16 = ~0x7;
 
-int main()
+int main(int argc, char* argv[])
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) fprintf(stderr, "%s\n", SDL_GetError());
     IMG_Init(IMG_INIT_PNG);
 
-    SDL_Window* window = SDL_CreateWindow(WINDOW_TITLE, -1, -1, WINDOW_WIDTH, WINDOW_HEIGHT,
+    SDL_Window* window = SDL_CreateWindow(WINDOW_TITLE, 100, 100, WINDOW_WIDTH, WINDOW_HEIGHT,
                                           SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     RETURN_ERROR(!window, fprintf(stderr, "%s\n", SDL_GetError()));
 
@@ -104,7 +104,10 @@ int main()
         {
             uint64_t ticksNaive  = RunBenchmark(DrawMandelbrotNaive, surface, &camera, (uint32_t*)palette);
             uint64_t ticksArrays = RunBenchmark(DrawMandelbrotArrays, surface, &camera, (uint32_t*)palette);
-            uint64_t ticksAVX    = RunBenchmark(DrawMandelbrotAVX512, surface, &camera, (uint32_t*)palette);
+            uint64_t ticksAVX    = 0;
+            #ifdef AVX512
+            ticksAVX    = RunBenchmark(DrawMandelbrotAVX512, surface, &camera, (uint32_t*)palette);
+            #endif
             fprintf(resFile, "%llu\t%llu\t%llu\t\n", ticksNaive, ticksArrays, ticksAVX);
         }
 
